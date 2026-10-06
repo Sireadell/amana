@@ -58,9 +58,8 @@ I would rather say these clearly than hide them.
 
 | Limit | What it means |
 |---|---|
-| One Aave vault only | Amana only accepts this one Aave USDC vault share token, called waCoreUSDC |
+| One Aave vault only, for now | Amana accepts only the Aave USDC vault share token, called waCoreUSDC. I plan to reach out to other vaults, like Morpho, to see if they can work with Amana. This contract cannot change, so supporting another vault would mean a new version |
 | Aave can halt or upgrade the vault | Amana cannot protect against Aave changing or pausing the vault |
-| The vault is small | The vault holds only about 4,450 USDC, so amounts should stay small |
 | Seller is paid in shares if they claim | If I claim after a missed date, I receive vault shares worth what is owed. I cash those out in Aave |
 | Open requests can be taken by anyone | If I do not name a buyer, any wallet can pledge to the request. I should name the buyer if that matters |
 | A stray token sent by mistake is stuck | There is no admin key, so nobody can rescue tokens sent outside the normal Amana actions |
@@ -68,18 +67,6 @@ I would rather say these clearly than hide them.
 | Amana is not a court | It enforces the pledge and the date. It cannot tell whether goods arrived |
 
 I had the contract reviewed before deployment by a separate reviewer whose job was to break it. The report is in [FINDINGS.md](FINDINGS.md). The issues it raised are either fixed or listed in this honest limits section.
-
-## Rivals
-
-I do not claim Amana is first on Arc. I searched for close projects and found these differences.
-
-| Project | What it does | How Amana is different |
-|---|---|---|
-| Anvil | A collateral guarantee on Ethereum where the receiver can draw any time before expiry | Anvil is on Ethereum. Amana is on Arc, and the seller cannot claim before the due date plus 1 hour |
-| ShadowFloat | Reserve-backed USDC spending lines on Arc | ShadowFloat is a spending line backed by reserves. Amana is one request, one due date, and one buyer pledge |
-| Escrow and invoice repos | Money is usually held idle until someone releases it | Amana uses Aave savings the buyer already has, and those savings keep earning while pledged |
-
-The search only supports this narrower claim: I did not find another yield-share pledge against a due date.
 
 ## Tests
 
