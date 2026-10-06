@@ -1,0 +1,11 @@
+node_modules
+cache
+artifacts
+.env
+mainnet/.demo-buyer.json
+*.tmp.cjs
+CHATGPT_BRIEF.md
+CODEX_README_BRIEF.md
+COPY_DRAFT.md
+README_CODEX.md
+mockup/

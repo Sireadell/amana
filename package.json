@@ -1,0 +1,15 @@
+{
+  "name": "amana",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A due-date guarantee on Arc: the buyer pledges yield-bearing vault shares, the seller can claim only after the due date.",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.29.1"
+  }
+}
