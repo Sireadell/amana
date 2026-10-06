@@ -9,3 +9,5 @@ CODEX_README_BRIEF.md
 COPY_DRAFT.md
 README_CODEX.md
 mockup/
+mainnet/.demo-buyer2.json
+mainnet/v2/*.log

@@ -1,0 +1,37 @@
+{
+  "amana": "0x9AbcF46919C3778FD33F3Bd56ac33dFcb015138a",
+  "deployTx": "0x2f25db4ecaa0e43476908d3a118131e12dd5791232f60b46a3d28819bc22cc74",
+  "deployBlock": 24583231,
+  "deployer": "0xb3FB14FEcac09efbD0C74Fc07d50d7eD1eef2B53",
+  "fundTx": "0x6795a57b5e1e41365bbf53f3ab56716fb56e79794a50fc55fec2479e922015ad",
+  "buyer": "0xa4E754507dd6Fa4DDa840561DB2f049cF956c284",
+  "depositTx": "0x86c00f389f18a72ef104bfa540ead1ca6e8d17fb4bdc6dfb82a5990215b132ec",
+  "setupDone": true,
+  "stage1": true,
+  "idA": "1",
+  "idB": "2",
+  "due": 1791302088,
+  "claimOpens": 1791305688,
+  "txs1": {
+    "createA": "0xf5e57a20c108e09d98c22161c47656fc06d445c230d3b0905629f4fa68179f07",
+    "createB": "0x3aed354685607c21adaee379c95f9cb7360748355f3856000188340f0fdc509c",
+    "approveA": "0xa2287fed73ff26df65fdf5fec55781df89551036cde1ba8ab91134a8f507fdd1",
+    "pledgeA": "0xaed9c7140c54d39bf5e3c6ac0ffe3ede1678a871ed433aaa1363e266b3aeb65c",
+    "approveB": "0xc82999fb649610d5ed15809cd21cf48ac4c01733ef9ad6ea4ea61a3f85ccec97",
+    "pledgeB": "0x874c912d3a43f32e528c8d69bfe47cff9800ac43185e743cf4675ca39504e1e8",
+    "earlyClaimFailed": "0xb91a4e0a8298a5c50c59c5717f355cfbabde56362428bd69a998b1495dd5f73e",
+    "approveUsdcB": "0xb02e72082e874cff96228cfc8f910a0736168e6bf27ea6a16ac982711dc09b33",
+    "payB": "0x25f9204998b1fa447f44956a3ede952072de8a5d2c0ec31cb5c7665967b70171"
+  },
+  "sharesPerRequest": "1049899800584187746",
+  "stage2": true,
+  "txs2": {
+    "claimA": "0x99f8e132f47866ecd42255cfd093068a72a003141f128f0ebdd7c0c99474419c",
+    "redeem": "0xa2aa3f51b595c7ca0524a0eb273156cd5c1f5b005ce8ee78a040502abc97120e"
+  },
+  "claimResult": {
+    "sellerShares": "999903001499949072",
+    "worth": "1000000",
+    "buyerBack": "49996799084238674"
+  }
+}
