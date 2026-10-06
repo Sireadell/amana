@@ -73,6 +73,11 @@ summary{cursor:pointer;color:var(--mute);padding:4px 0}
 dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:8px 0 0;font-size:13.5px}
 dt{color:var(--mute)}dd{margin:0;word-break:break-all}
 details p{margin:8px 0 0;color:var(--mute)}
+.stat small{display:block;font-size:11.5px;color:var(--mute);min-height:14px}
+.row{display:flex;gap:8px;align-items:end}
+.row>*{flex:1;min-width:0}
+select{font:inherit;color:inherit;padding:2px 4px;border:1px solid var(--line);border-radius:8px;background:var(--bg);margin-left:6px}
+.record{font-size:13.5px;color:var(--mute);margin:0 0 10px}
 .mylist{margin:2px 0 0;font-size:14px;color:var(--mute)}
 .mylist button{margin:0 8px 0 0;font-size:14px}
 .sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;z-index:5}
@@ -93,7 +98,7 @@ details p{margin:8px 0 0;color:var(--mute)}
 <div class="app" id="app">
   <header>
     <span class="brand">Amana</span>
-    <button class="chip" id="wallet" type="button">Connect wallet</button>
+    <span style="display:flex;gap:6px"><button class="chip" id="ngnBtn" type="button" title="Show amounts in naira" hidden>&#8358; on</button><button class="chip" id="wallet" type="button">Connect wallet</button></span>
   </header>
 
   <main id="main"></main>
@@ -118,7 +123,11 @@ const CFG = {
   rpc: 'https://rpc.mainnet.arc.io',
   chainId: 5042,
   explorer: 'https://explorer.arc.io',
-  readme: 'https://github.com/Sireadell/amana'
+  readme: 'https://github.com/Sireadell/amana',
+  deployBlock: 24454039,
+  celoRpc: 'https://forno.celo.org',
+  ngnFeed: '0xc17cBE2dB40e53F4984C46F608DA6DA1fF074c11',
+  rateUrl: 'https://open.er-api.com/v6/latest/USD'
 };
 const HF_ABI = [
   'function createRequest(uint256 amount,uint64 dueAt,address buyer) returns (uint256)',
@@ -135,10 +144,11 @@ const HF_ABI = [
   'function claimOpensAt(uint256 id) view returns (uint256)',
   'function sharesNeededFor(uint256 amount) view returns (uint256)',
   'function termsHashOf(uint256 id) view returns (bytes32)',
-  'event RequestCreated(uint256 indexed id,address indexed seller,address indexed buyer,uint256 amount,uint64 dueAt,bytes32 termsHash)'
+  'event RequestCreated(uint256 indexed id,address indexed seller,address indexed buyer,uint256 amount,uint64 dueAt,bytes32 termsHash)',
+  'event Claimed(uint256 indexed id,address indexed seller,uint256 sharesToSeller,uint256 sharesToBuyer,uint256 owedAtClaim)'
 ];
 const ERC_ABI = ['function approve(address,uint256) returns (bool)', 'function allowance(address,address) view returns (uint256)', 'function balanceOf(address) view returns (uint256)'];
-const VAULT_ABI = [...ERC_ABI, 'function convertToAssets(uint256) view returns (uint256)', 'function maxRedeem(address) view returns (uint256)'];
+const VAULT_ABI = [...ERC_ABI, 'function convertToAssets(uint256) view returns (uint256)', 'function maxRedeem(address) view returns (uint256)', 'function redeem(uint256 shares,address receiver,address owner) returns (uint256)'];
 const STATES = ['NONE', 'OPEN', 'PLEDGED', 'PAID', 'CLAIMED', 'RELEASED', 'RECLAIMED', 'CANCELLED'];
 const GRACE = 3600, RECLAIM = 30 * 86400, MAX_TERM = 365 * 86400;
 
@@ -157,6 +167,71 @@ const dateTxt = (t) => new Date(Number(t) * 1000).toLocaleDateString('en-GB', { 
 const dateShort = (t) => new Date(Number(t) * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 const dateTime = (t) => new Date(Number(t) * 1000).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 const nowSec = () => Math.floor(Date.now() / 1000);
+
+/* naira: USDC stays the real money, naira is only shown next to it, from a live rate */
+const N = { rate: null, on: true };
+try { if (localStorage.getItem('amana_ngn') === 'off') N.on = false; const c = JSON.parse(localStorage.getItem('amana_rate') || 'null'); if (c && c.rate > 0) N.rate = c.rate; } catch {}
+const ngn = (raw) => (N.rate && N.on) ? '₦' + Math.round(Number(raw) / 1e6 * N.rate).toLocaleString('en-NG') : '';
+const ngnAbout = (raw) => ngn(raw) ? ' (about ' + ngn(raw) + ')' : '';
+function paintNgnBtn() { const b = $('#ngnBtn'); if (!b) return; b.hidden = !N.rate; b.textContent = '₦ ' + (N.on ? 'on' : 'off'); }
+/* Main source: Chainlink NGN/USD on Celo, read straight from the chain. Backup: a website rate. */
+const FEED_ABI = ['function latestRoundData() view returns (uint80,int256,uint256,uint256,uint80)', 'function decimals() view returns (uint8)'];
+async function chainlinkRate() {
+  const p = new ethers.JsonRpcProvider(CFG.celoRpc, 42220, { staticNetwork: true });
+  const f = new ethers.Contract(CFG.ngnFeed, FEED_ABI, p);
+  const [d, r] = await Promise.all([f.decimals(), f.latestRoundData()]);
+  const price = Number(r[1]) / 10 ** Number(d), at = Number(r[3]);
+  if (!(price > 0) || nowSec() - at > 6 * 3600) throw new Error('stale');
+  return { rate: 1 / price, src: 'Chainlink', at };
+}
+async function siteRate() {
+  const j = await (await fetch(CFG.rateUrl)).json();
+  const r = j && j.rates && j.rates.NGN;
+  if (!(r > 0)) throw new Error('no rate');
+  return { rate: r, src: 'a website rate', at: nowSec() };
+}
+async function loadRate() {
+  let got = null;
+  try { got = await chainlinkRate(); } catch { try { got = await siteRate(); } catch {} }
+  if (got) {
+    const moved = !N.rate || Math.abs(got.rate - N.rate) / N.rate > 0.0005;
+    N.rate = got.rate; N.src = got.src; N.at = got.at;
+    try { localStorage.setItem('amana_rate', JSON.stringify({ rate: got.rate })); } catch {}
+    paintNgnBtn();
+    if (moved) repaint(); else paintRateNote();
+  } else paintNgnBtn();
+}
+function rateNote() {
+  if (!N.rate || !N.src) return '';
+  const mins = Math.max(0, Math.round((nowSec() - N.at) / 60));
+  return `Naira rate: ₦${N.rate.toLocaleString('en-NG', { maximumFractionDigits: 2 })} per USDC from ${N.src}, ${mins < 1 ? 'just now' : mins + ' min ago'}. It changes all the time, and the amount stays fixed in USDC.`;
+}
+function paintRateNote() { const el = $('#rateNote'); if (el) el.textContent = N.on ? rateNote() : ''; }
+function repaint() {
+  if (S.screen === 'request' && S.cur && S.cur.r) { const pa = $('#payAmt') && $('#payAmt').value; S.cur.html = requestHtml(S.cur); render(); if (pa && $('#payAmt')) { $('#payAmt').value = pa; $('#payAmt').dispatchEvent(new Event('input', { bubbles: true })); } fillRecord(S.cur); }
+  else if (S.screen === 'home') { const a = $('#amt') && $('#amt').value, d = $('#due') && $('#due').value, w = $('#who') && $('#who').value, u = $('#unit') && $('#unit').value; render(); if (a) $('#amt').value = a; if (d) $('#due').value = d; if (w) $('#who').value = w; if (u && $('#unit')) $('#unit').value = u; updateHelper(); }
+}
+
+/* a buyer's record on Amana, counted from the requests on the contract */
+async function allRequests() {
+  if (S.all) return S.all;
+  const n = Number(await retry(() => hfR.requestCount()));
+  const ids = []; for (let i = n; i >= 1 && ids.length < 300; i--) ids.push(i);
+  const out = [];
+  for (let i = 0; i < ids.length; i += 25) out.push(...await Promise.all(ids.slice(i, i + 25).map((id) => retry(() => hfR.getRequest(id)))));
+  S.all = out; return out;
+}
+async function fillRecord(c) {
+  if (!c || !c.r || c.r.buyer === ethers.ZeroAddress) return;
+  try {
+    const all = await allRequests(); const b = c.r.buyer.toLowerCase();
+    let paid = 0, missed = 0, active = 0;
+    for (const r of all) { if (r.buyer.toLowerCase() !== b) continue; const s = STATES[Number(r.state)]; if (s === 'PAID') paid++; else if (s === 'CLAIMED') missed++; else if (s === 'PLEDGED') active++; }
+    const el = $('#rec'); if (!el) return;
+    el.textContent = paid + missed + active === 0 ? 'This buyer has no finished requests on Amana yet.'
+      : `This buyer on Amana: paid in full ${paid}, seller had to claim ${missed}, still open ${active}.`;
+  } catch {}
+}
 
 function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2600); }
 function setMsg(text, err, href, hrefText) {
@@ -232,7 +307,7 @@ function track(state, late) {
   return '<div class="track" aria-label="Progress">' + names.map((n, i) =>
     `<div class="step ${cls[i]}"><div class="dot">${cls[i] === 'done' || cls[i] === 'bad' ? '&#10003;' : i + 1}</div>${n}</div>`).join('') + '</div>';
 }
-const stats = (o, p, d) => `<div class="stats"><div class="stat"><b>${o}</b><span>owed</span></div><div class="stat"><b>${p}</b><span>pledged</span></div><div class="stat"><b>${d}</b><span>due</span></div></div>`;
+const stats = (o, p, d, on = '', pn = '') => `<div class="stats"><div class="stat"><b>${o}</b><small>${on}</small><span>owed</span></div><div class="stat"><b>${p}</b><small>${pn}</small><span>pledged</span></div><div class="stat"><b>${d}</b><small></small><span>due</span></div></div>`;
 function clockTxt(sec) {
   sec = Math.max(0, sec);
   const d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
@@ -244,10 +319,12 @@ function detailsHtml(c) {
     <dt>Request</dt><dd>#${c.id}</dd>
     <dt>Seller</dt><dd>${r.seller}</dd>
     <dt>Buyer</dt><dd>${r.buyer === ethers.ZeroAddress ? 'Anyone can pledge' : r.buyer}</dd>
+    <dt>Paid so far</dt><dd>${usd(r.paid)} of ${usd(r.amount)}</dd>
     <dt>Due</dt><dd>${dateTxt(r.dueAt)}</dd>
     <dt>Claim opens</dt><dd>${dateTime(c.claimOpens)}, 1 hour after the due date</dd>
     <dt>Buyer can take it back</dt><dd>${dateTime(c.claimOpens + RECLAIM)}, 30 days after the claim opens</dd>
     <dt>Pledged shares</dt><dd>${r.shares > 0n ? num(r.shares, 0, 6) + ' waCoreUSDC' : 'None locked'}</dd>
+    ${N.rate && N.on ? `<dt>Naira rate</dt><dd>${rateNote()}</dd>` : ''}
     <dt>Contract</dt><dd>${CFG.holdfast} on Arc mainnet</dd>
     <dt>Share link</dt><dd>${shareLink(c.id)}</dd>
   </dl>
@@ -263,7 +340,7 @@ function homeHtml() {
       <h1>Sell now, get paid or protected later.</h1>
       <p class="lead">Make a request for the amount owed and the date payment is due. The buyer backs their promise with Aave savings they already have.</p>
       <div class="card">
-        <label for="amt">How much are you owed, in USDC?</label>
+        <label for="amt">How much are you owed?${N.rate ? '<select id="unit" aria-label="Currency"><option value="USDC">USDC</option><option value="NGN">Naira</option></select>' : ' (in USDC)'}</label>
         <input id="amt" inputmode="decimal" placeholder="200" value="200">
         <div class="two">
           <div><label for="due">Pay me by</label><input id="due" type="date"></div>
@@ -277,6 +354,7 @@ function homeHtml() {
         <button class="link" data-sheet="how" type="button">See how it works</button>
         <button class="link" data-sheet="why" type="button">Why this exists</button>
       </div>
+      <p class="hint" id="rateNote">${N.on ? rateNote() : ''}</p>
       ${mine}
       <div class="spacer"></div>
       <form class="two" id="lookupS" style="grid-template-columns:1fr auto;align-items:end" onsubmit="return false">
@@ -313,17 +391,17 @@ function requestHtml(c) {
   if (state === 'OPEN') {
     cls = 'warn';
     const passed = now >= Number(r.dueAt);
-    statLine = stats(amt, 'Not yet', dueS);
+    statLine = stats(amt, 'Not yet', dueS, ngn(r.amount));
     if (passed) { head = 'The due date has passed.'; body = 'Nobody pledged before the date, so this request can no longer be pledged.'; }
     else if (isS) { head = "Waiting for the buyer's pledge."; body = 'Send the request link to the buyer. Nothing is protected yet, and you can cancel before they pledge. The buyer must pledge at least 105% of the amount owed.'; }
     else if (isB) { head = 'Pledge your Aave savings to accept.'; body = `You owe ${amt}. To accept, pledge at least ${pledgeWorth} worth of your Aave USDC vault shares.`; }
     else if (role === 'other') { head = 'This request is for a different wallet.'; body = 'The seller named another buyer for this request, so only that wallet can pledge.'; }
     else { head = "Waiting for the buyer's pledge."; body = `The buyer must pledge at least ${pledgeWorth} worth of Aave USDC vault shares to cover ${amt}.`; }
     if (isB && !passed) {
-      let line1 = `<p>Needed: <b>${pledgeWorth}</b> worth</p>`, line2, line3 = '';
+      let line1 = `<p>Needed: <b>${pledgeWorth}</b> worth${ngnAbout(c.neededWorth)}</p>`, line2, line3 = '';
       if (c.haveWorth == null) line2 = '<p>You have: not read yet</p>';
       else {
-        line2 = `<p>You have: <b>${worthTxt(c.haveWorth)}</b> worth</p>`;
+        line2 = `<p>You have: <b>${worthTxt(c.haveWorth)}</b> worth${ngnAbout(c.haveWorth)}</p>`;
         line3 = c.enough ? '<p class="ok">You already have enough to cover this.</p>'
           : '<p class="no">You do not have enough yet.</p><p class="hint">First deposit USDC into the Aave USDC vault (waCoreUSDC), then come back.</p>';
       }
@@ -338,7 +416,7 @@ function requestHtml(c) {
     else btns = '<button class="big" data-act="connect" type="button">Connect wallet to pledge</button>';
   } else if (state === 'PLEDGED') {
     const pw = c.worth != null ? worthTxt(c.worth) : '';
-    statLine = stats(usd(owed), pw ? num(c.worth, 0, 2) + ' USDC' : '...', dueS);
+    statLine = stats(usd(owed), pw ? num(c.worth, 0, 2) + ' USDC' : '...', dueS, ngn(owed), c.worth != null ? ngn(c.worth) : '');
     cls = claimable ? 'bad' : '';
     if (!late) {
       S.target = isS ? c.claimOpens : Number(r.dueAt);
@@ -367,6 +445,14 @@ function requestHtml(c) {
     } else if (role === 'other') btns = '<button class="big" data-home type="button">Back home</button>';
     else btns = '<button class="big" data-act="connect" type="button">Connect wallet</button>';
     if (role === 'visitor') body += ' Connect the seller\'s or buyer\'s wallet to act on this request.';
+    if (r.paid > 0n) body += ` ${usd(r.paid)} of ${amt} is already paid.`;
+    if (isB) {
+      sav = `<div class="savings"><h3>How much do you want to pay now?</h3>
+        <div class="row"><div><input id="payAmt" inputmode="decimal" aria-label="Amount in USDC" value="${ethers.formatUnits(owed, 6).replace(/\.0$/, '')}"></div><button class="ghost" id="halfBtn" type="button" style="margin:0">Half</button></div>
+        <p class="hint" id="payHint">You can pay all of it, or part now and the rest later. Your pledge comes back once it is all paid.</p></div>`;
+      btns = btns.replace(/<button class="big" data-act="pay" type="button">[^<]*<\/button>/, '<button class="big" data-act="pay" id="payBtn" type="button">' + (late ? 'Pay now' : 'Pay ' + usd(owed)) + '</button>');
+    }
+    if (isS && !claimable) btns += '<button class="ghost" data-act="remind" type="button">Remind the buyer on WhatsApp</button>';
   } else {
     const T = {
       PAID: ['Paid in full.', '', `The seller received ${usd(r.amount)}. The buyer got every pledged share back, including any yield earned while pledged.`, ['0 USDC', 'Returned', dueS]],
@@ -377,6 +463,7 @@ function requestHtml(c) {
     }[state];
     [head, cls, body] = T; statLine = stats(...T[3]);
     btns = '<button class="big" data-home type="button">Back home</button>';
+    if (isS && state === 'CLAIMED' && c.cashShares > 0n) btns = `<button class="big" data-act="cashout" type="button">Cash out about ${worthTxt(c.cashWorth)} to USDC${ngnAbout(c.cashWorth)}</button>` + btns.replace('class="big"', 'class="ghost"');
     if (isS && c.credit > 0n) btns += `<button class="ghost" data-act="withdraw" type="button">Collect ${usd(c.credit)} held for me</button>`;
   }
   if (isS && c.credit > 0n && state !== 'PAID' && !btns.includes('withdraw')) btns += `<button class="ghost" data-act="withdraw" type="button">Collect ${usd(c.credit)} held for me</button>`;
@@ -385,6 +472,7 @@ function requestHtml(c) {
     ${track(state)}
     <div class="status ${cls}"><h2>${head}</h2>${clock}<p>${body}</p></div>
     ${statLine}
+    ${r.buyer !== ethers.ZeroAddress ? '<p class="record" id="rec"></p>' : ''}
     ${sav}
     <div class="spacer"></div>
     ${msgEl}
@@ -429,10 +517,13 @@ function render() {
 }
 function updateHelper() {
   const h = $('#helper'); if (!h) return;
-  const v = ($('#amt').value || '').trim();
-  const n = /^\d+(\.\d{1,6})?$/.test(v) ? Number(v) : null;
+  let v = ($('#amt').value || '').trim().replace(/,/g, '');
+  const inNgn = $('#unit') && $('#unit').value === 'NGN' && N.rate;
+  let n = /^\d+(\.\d{1,6})?$/.test(v) ? Number(v) : null;
+  if (n !== null && inNgn) { n = Math.round(n / N.rate * 100) / 100; v = String(n); }
+  const fmt = (x) => x.toLocaleString(undefined, { maximumFractionDigits: 2 });
   h.textContent = n === null ? 'The buyer must pledge at least 105% of the amount owed, in Aave USDC vault shares.'
-    : `For ${v} USDC due, the buyer must pledge at least ${(Math.ceil(n * 105) / 100).toLocaleString(undefined, { maximumFractionDigits: 2 })} USDC worth of Aave USDC vault shares.`;
+    : `${inNgn ? 'That is about ' + v + ' USDC at today\'s rate, and it is fixed in USDC once you make the request. ' : ''}For ${v} USDC due, the buyer must pledge at least ${fmt(Math.ceil(n * 105) / 100)} USDC worth${N.rate && N.on ? ' (about ₦' + Math.round(Math.ceil(n * 105) / 100 * N.rate).toLocaleString('en-NG') + ')' : ''} of Aave USDC vault shares.`;
 }
 function goHome(tab) {
   if (tab) S.tab = tab;
@@ -466,12 +557,21 @@ async function loadRequest(id, keepMsg) {
       c.enough = have >= needed;
     }
     if (isSeller) c.credit = await retry(() => hfR.credited(account));
+    if (isSeller && state === 'CLAIMED') {
+      let claimed = null;
+      try { const ev = await retry(() => hfR.queryFilter(hfR.filters.Claimed(id), CFG.deployBlock)); if (ev.length) claimed = ev[ev.length - 1].args.sharesToSeller; } catch {}
+      const have = await retry(() => vaultR.balanceOf(account)), maxR = await retry(() => vaultR.maxRedeem(account));
+      let sh = claimed == null ? have : (claimed < have ? claimed : have);
+      if (sh > maxR) sh = maxR;
+      c.cashShares = sh; c.cashWorth = sh > 0n ? await retry(() => vaultR.convertToAssets(sh)) : 0n;
+    }
   } catch (e) { /* show what we have; actions re-check on click */ }
   if (c.neededWorth == null) c.neededWorth = (r.amount * 105n) / 100n;
   c.html = requestHtml(c);
   S.cur = c;
   history.replaceState(null, '', '?id=' + id);
   render();
+  S.all = null; fillRecord(c);
 }
 
 async function loadMine() {
@@ -489,7 +589,8 @@ async function loadMine() {
 /* ---------- actions ---------- */
 async function createReq() {
   setMsg('');
-  const amt = $('#amt').value.trim(), due = $('#due').value, buyer = $('#who').value.trim();
+  let amt = $('#amt').value.trim().replace(/,/g, ''); const due = $('#due').value, buyer = $('#who').value.trim();
+  if ($('#unit') && $('#unit').value === 'NGN' && N.rate && /^\d+(\.\d{1,2})?$/.test(amt)) amt = (Math.round(Number(amt) / N.rate * 100) / 100).toFixed(2);
   if (!/^\d+(\.\d{1,6})?$/.test(amt) || Number(amt) < 1) return setMsg('Enter an amount of at least 1 USDC.', true);
   if (!due) return setMsg('Pick the date you want to be paid by.', true);
   if (buyer && !ethers.isAddress(buyer)) return setMsg('That buyer address is not valid.', true);
@@ -513,11 +614,13 @@ async function createReq() {
 const hfW = () => new ethers.Contract(CFG.holdfast, HF_ABI, signer);
 async function act(name) {
   const c = S.cur; if (!c) return;
-  if (name === 'send') {
-    const link = shareLink(c.id);
-    try { await navigator.clipboard.writeText(link); toast('Link copied. Send it to the buyer.'); }
-    catch { setMsg('Send the buyer this link: ' + link); }
-    window.open('https://wa.me/?text=' + encodeURIComponent('Amana request to pledge: ' + link), '_blank', 'noopener');
+  if (name === 'send' || name === 'remind') {
+    const link = shareLink(c.id), how = `${usd(c.r.amount)}${ngnAbout(c.r.amount)}`, due = dateTxt(c.r.dueAt);
+    const text = name === 'send'
+      ? `Hello, I am asking for ${how} by ${due}. You can back your promise with the Aave savings you already have, so you do not have to cash anything out and it keeps earning. Open the request here: ${link}`
+      : `Hello, a reminder that ${usd(c.owed)}${ngnAbout(c.owed)} is due on ${due}. You can pay it here, and your pledged savings come back to you: ${link}`;
+    try { await navigator.clipboard.writeText(link); toast('Link copied.'); } catch {}
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
     return;
   }
   if (name === 'connect') { if (await connect()) loadRequest(c.id); return; }
@@ -535,10 +638,23 @@ async function act(name) {
     if (!(await tx('Approve the exact shares', () => v.approve(CFG.holdfast, need)))) return;
     await tx('Pledge', () => hfW().pledge(c.id, c.r.termsHash, need));
   } else if (name === 'pay') {
+    const raw = ($('#payAmt') ? $('#payAmt').value : '').trim();
+    let amt = c.owed;
+    if (raw) {
+      if (!/^\d+(\.\d{1,6})?$/.test(raw) || Number(raw) <= 0) return setMsg('Enter an amount to pay, like 50.', true);
+      amt = ethers.parseUnits(raw, 6);
+      if (amt > c.owed) amt = c.owed;
+    }
     const u = new ethers.Contract(CFG.usdc, ERC_ABI, signer);
-    try { const bal = await retry(() => u.balanceOf(account)); if (bal < c.owed) return setMsg(`You need ${usd(c.owed)} in this wallet to pay. You have ${usd(bal)}.`, true); } catch {}
-    if (!(await tx('Approve the USDC', () => u.approve(CFG.holdfast, c.owed)))) return;
-    await tx('Pay', () => hfW().pay(c.id, c.owed));
+    try { const bal = await retry(() => u.balanceOf(account)); if (bal < amt) return setMsg(`You need ${usd(amt)} in this wallet to pay. You have ${usd(bal)}.`, true); } catch {}
+    if (!(await tx('Approve the USDC', () => u.approve(CFG.holdfast, amt)))) return;
+    await tx(amt < c.owed ? 'Part payment' : 'Pay', () => hfW().pay(c.id, amt));
+  } else if (name === 'cashout') {
+    const v = new ethers.Contract(CFG.vault, VAULT_ABI, signer);
+    let sh = c.cashShares;
+    try { const have = await retry(() => vaultR.balanceOf(account)), maxR = await retry(() => vaultR.maxRedeem(account)); if (sh > have) sh = have; if (sh > maxR) sh = maxR; } catch {}
+    if (!sh || sh <= 0n) return setMsg('There is nothing to cash out right now.', true);
+    await tx('Cash out', () => v.redeem(sh, account, account));
   } else if (name === 'claim') await tx('Claim', () => hfW().claim(c.id));
   else if (name === 'release') await tx('Release', () => hfW().release(c.id));
   else if (name === 'cancel') await tx('Cancel', () => hfW().cancel(c.id));
@@ -554,6 +670,8 @@ function openNumber(v) {
 
 document.addEventListener('click', (e) => {
   const t = e.target.closest('button'); if (!t) return;
+  if (t.id === 'ngnBtn') { N.on = !N.on; try { localStorage.setItem('amana_ngn', N.on ? 'on' : 'off'); } catch {} paintNgnBtn(); repaint(); return; }
+  if (t.id === 'halfBtn') { const el = $('#payAmt'); if (el && S.cur) { el.value = (Number(S.cur.owed / 2n) / 1e6).toFixed(6).replace(/\.?0+$/, ''); el.dispatchEvent(new Event('input', { bubbles: true })); } return; }
   if (t.id === 'wallet') { connect().then((ok) => { if (ok) { if (S.cur) loadRequest(S.cur.id, true); else loadMine(); } }); return; }
   if (t.dataset.tab) { goHome(t.dataset.tab); return; }
   if (t.hasAttribute('data-home')) { goHome(); return; }
@@ -565,7 +683,16 @@ document.addEventListener('click', (e) => {
   if (t.id === 'openReq') { openNumber($('#num').value); return; }
   if (t.id === 'openS') { openNumber($('#numS').value); return; }
 });
-document.addEventListener('input', (e) => { if (e.target.id === 'amt') updateHelper(); });
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'amt') updateHelper();
+  if (e.target.id === 'payAmt' && S.cur) {
+    const raw = e.target.value.trim(), ok = /^\d+(\.\d{1,6})?$/.test(raw) && Number(raw) > 0;
+    const amt = ok ? ethers.parseUnits(raw, 6) : 0n, shown = amt > S.cur.owed ? S.cur.owed : amt;
+    const b = $('#payBtn'); if (b && ok) b.textContent = (S.cur.now >= Number(S.cur.r.dueAt) ? 'Pay ' : 'Pay ') + usd(shown) + (shown < S.cur.owed ? ' now' : '');
+    const h = $('#payHint'); if (h && ok) h.textContent = shown < S.cur.owed ? `${usd(S.cur.owed - shown)} will still be owed. Your pledge stays locked until it is all paid.` : 'This pays everything and frees your whole pledge.';
+  }
+});
+document.addEventListener('change', (e) => { if (e.target.id === 'unit') updateHelper(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.target.id === 'num' || e.target.id === 'numS')) openNumber(e.target.value); });
 $('#sheetBg').addEventListener('click', (e) => { if (e.target.id === 'sheetBg') e.target.hidden = true; });
 
@@ -581,6 +708,9 @@ if (window.ethereum && window.ethereum.on) window.ethereum.on('accountsChanged',
 (async () => {
   setup();
   render();
+  paintNgnBtn();
+  loadRate();
+  setInterval(loadRate, 60000);
   const id = new URLSearchParams(location.search).get('id');
   if (window.ethereum) { try { const a = await window.ethereum.request({ method: 'eth_accounts' }); if (a.length) await connect(); } catch {} }
   if (id && /^\d+$/.test(id) && id !== '0') await loadRequest(id);

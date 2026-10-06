@@ -52,6 +52,17 @@ These are real Arc mainnet transactions with real USDC and the real Aave vault.
 
 The scripts for these runs are in `mainnet/`.
 
+## On the page
+
+| Feature | What it does |
+|---|---|
+| Naira next to USDC | Amounts show in naira as well. The rate is read from the Chainlink NGN/USD price feed on Celo, refreshed every minute. If that feed cannot be read, the page falls back to a website rate. The amount itself stays fixed in USDC, so its naira value moves with the rate |
+| Price in naira | A seller can type the amount in naira. The page converts it at the live rate, and the request is made in USDC |
+| Pay in parts | A buyer can pay part now and the rest later. The pledge comes back once everything is paid |
+| Cash out in one click | After a claim, the seller can turn the claimed shares into USDC without leaving the page |
+| Buyer record | Each request shows how many times that buyer paid in full and how many times a seller had to claim, counted from the contract |
+| WhatsApp message | The seller can send the request, or a reminder, as a ready-written WhatsApp message |
+
 ## Honest limits
 
 I would rather say these clearly than hide them.
