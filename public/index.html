@@ -40,6 +40,9 @@ svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .brand .beta{font-size:11px;font-weight:600;letter-spacing:0;color:var(--mute);border:1px solid var(--line2);background:var(--surface);border-radius:8px;padding:2px 9px;margin-left:6px}
 .actions{display:flex;gap:10px;align-items:center}
 .hbtn{display:inline-flex;align-items:center;gap:9px;min-height:42px;border:1px solid var(--line2);background:var(--surface);border-radius:12px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;transition:border-color .15s,transform .1s}
+#wmenu{background:var(--surface);border:1px solid var(--line2);border-radius:12px;padding:6px;display:flex;flex-direction:column;min-width:170px;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+#wmenu button{background:none;border:0;color:inherit;font:inherit;font-size:14px;font-weight:600;text-align:left;padding:10px 12px;border-radius:8px;cursor:pointer}
+#wmenu button:hover{background:var(--ok-line)}
 .hbtn:hover{border-color:var(--ok-line)}
 .hbtn:active{transform:scale(.98)}
 .hbtn .dot{width:20px;height:20px;border-radius:50%;background:#1b66ff;display:grid;place-items:center;flex:none}
@@ -544,8 +547,25 @@ async function connect() {
     signer = await p2.getSigner();
     account = (await signer.getAddress()).toLowerCase();
     $('#wallet').textContent = shortAddr(account);
+    try { localStorage.removeItem('amana_off'); } catch {}
     return true;
   } catch (e) { setMsg('Could not connect your wallet: ' + friendly(e), true); return false; }
+}
+/* small menu under the address: copy it, or disconnect */
+function walletMenu() {
+  const old = $('#wmenu'); if (old) { old.remove(); return; }
+  const b = $('#wallet'), r = b.getBoundingClientRect(), m = document.createElement('div');
+  m.id = 'wmenu'; m.style.cssText = 'position:fixed;z-index:60;top:' + (r.bottom + 6) + 'px;right:' + Math.max(8, innerWidth - r.right) + 'px';
+  m.innerHTML = '<button type="button" data-w="copy">Copy address</button><button type="button" data-w="off">Disconnect</button>';
+  document.body.append(m);
+  m.onclick = async (e) => {
+    const k = e.target.dataset.w; if (!k) return;
+    if (k === 'copy') { try { await navigator.clipboard.writeText(ethers.getAddress(account)); toast('Address copied.'); } catch { toast('Could not copy.'); } m.remove(); return; }
+    try { localStorage.setItem('amana_off', '1'); } catch {}
+    try { await window.ethereum.request({ method: 'wallet_revokePermissions', params: [{ eth_accounts: {} }] }); } catch {}
+    location.reload();
+  };
+  setTimeout(() => document.addEventListener('click', function f(e) { if (!e.target.closest('#wmenu') && e.target.id !== 'wallet') { const x = $('#wmenu'); if (x) x.remove(); } document.removeEventListener('click', f); }), 0);
 }
 const ensure = async () => { if (DEMO) { toast('Demo screens only. Nothing is sent.'); return false; } if (!signer && !(await connect())) return false; return true; };
 
@@ -1297,6 +1317,7 @@ document.addEventListener('click', (e) => {
     if (el && S.cur) { el.value = (Number(S.cur.owed / 2n) / 1e6).toFixed(6).replace(/\.?0+$/, ''); el.dispatchEvent(new Event('input', { bubbles: true })); act('pay'); }
     return;
   }
+  if (t.id === 'wallet' && account) { walletMenu(); return; }
   if (t.id === 'wallet') { connect().then((ok) => { if (ok) { S.all = null; if (S.cur && (S.screen === 'request' || S.screen === 'share')) loadRequest(S.cur.id, true); else if (S.screen === 'mine') loadMine(); else if (S.screen === 'record') { const w = $('#rwal'); if (w && !w.value) w.value = account; } } }); return; }
   if (t.dataset.mtab) { S.mtab = t.dataset.mtab; paintMine(); return; }
   if (t.hasAttribute('data-next')) {
@@ -1353,7 +1374,8 @@ if (window.ethereum && window.ethereum.on) window.ethereum.on('accountsChanged',
   paintNgnBtn();
   loadRate();
   setInterval(loadRate, 60000);
-  if (!DEMO && window.ethereum) { try { const a = await window.ethereum.request({ method: 'eth_accounts' }); if (a.length) await connect(); } catch {} }
+  let off = false; try { off = localStorage.getItem('amana_off') === '1'; } catch {}
+  if (!DEMO && window.ethereum && !off) { try { const a = await window.ethereum.request({ method: 'eth_accounts' }); if (a.length) await connect(); } catch {} }
   route();
 })();
 </script>
