@@ -6,146 +6,343 @@
 <title>Amana</title>
 <meta name="description" content="Amana lets a buyer promise payment by pledging yield savings they already hold, while the seller can claim only what is owed if the buyer misses the date. Live on Arc mainnet.">
 <link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <style>
-:root{--bg:#fafaf7;--ink:#1b1b18;--mute:#66665e;--line:#dedcd2;--card:#fff;--accent:#1f5f4a;--accent-ink:#fff;--tint:#e6f1ec;--warn:#9a4a00;--warn-tint:#f8ecdc;--bad:#9b1c1c;--bad-tint:#f7e3e3;--shadow:0 6px 24px rgba(0,0,0,.08)}
-@media (prefers-color-scheme:dark){:root{--bg:#141412;--ink:#ecebe4;--mute:#a2a197;--line:#33322c;--card:#1c1c19;--accent:#59b394;--accent-ink:#0d1b16;--tint:#1c2b25;--warn:#e0a35c;--warn-tint:#2e2418;--bad:#ef8b8b;--bad-tint:#2f1d1d;--shadow:0 6px 24px rgba(0,0,0,.4)}}
+:root{
+  --bg:#050b09;--surface:#0a1512;--surface2:#08110e;--ink:#f3f7f5;--mute:#8b9b94;--line:#15271f;--line2:#1f372d;
+  --accent:#2fe5a6;--accent-hover:#5af0bc;--accent-ink:#03130c;--tint:#0d2a20;--accent-glow:rgba(47,229,166,.28);
+  --warn:#f2a54a;--warn-tint:#2a1c08;--warn-line:#5a3b11;--bad:#ff8f8f;--bad-tint:#2b1313;--bad-line:#5a2626;--ok-line:#1b4d3a;
+  --blue:#6aa8ff;--blue-tint:#0f1f3a;--blue-line:#23407a;
+  --bar:rgba(5,11,9,.88);--skel1:#0d1a15;--skel2:#16281f;
+  --shadow:0 0 0 1px rgba(255,255,255,.012),0 14px 34px -10px rgba(0,0,0,.6);--shadow-lg:0 24px 70px -10px rgba(0,0,0,.8);
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+}
+:root{color-scheme:dark}
 *{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:flex;flex-direction:column;align-items:center}
-button,input{font:inherit;color:inherit}
-.app{width:100%;max-width:420px;flex:1;min-height:0;background:var(--bg);display:flex;flex-direction:column;position:relative}
-@media (min-width:600px){.app{margin:16px 0;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;max-height:780px}}
-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px 2px}
-.brand{font-weight:800;letter-spacing:.02em;color:var(--accent);font-size:18px}
-.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer}
-main{flex:1;min-height:0;overflow:auto;padding:6px 16px 10px;display:flex;flex-direction:column}
-h1{font-size:23px;line-height:1.2;margin:6px 0 6px}
-.lead{color:var(--mute);margin:0 0 10px;font-size:14.5px;line-height:1.4}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:0 0 10px}
-.card h3{margin:0 0 6px;font-size:16px}
-label{display:block;font-size:14px;color:var(--mute);margin:8px 0 3px}
-label:first-child{margin-top:0}
-input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
-input:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.big{display:block;width:100%;padding:15px;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:17px;cursor:pointer}
-.big:disabled{background:var(--line);color:var(--mute);cursor:not-allowed}
-.ghost{display:block;width:100%;margin-top:8px;padding:11px;border:1px solid var(--line);border-radius:12px;background:transparent;cursor:pointer;font-weight:600;font-size:15px}
-.link{background:none;border:0;color:var(--accent);padding:4px 0;cursor:pointer;font-weight:600;text-decoration:underline;font-size:15px}
-.hint{color:var(--mute);font-size:13.5px;margin:6px 0 0;line-height:1.4}
-.spacer{flex:1;min-height:6px}
-.msg{margin:6px 0 8px;font-size:14px;min-height:0}
-.msg:empty{display:none}
-.msg.err{color:var(--bad)}
-.msg a{color:var(--accent)}
-nav{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);background:var(--card)}
-nav button{background:none;border:0;padding:10px 8px 12px;cursor:pointer;color:var(--mute);font-weight:600;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:2px}
-nav button .ic{font-size:19px;line-height:1}
-nav button.on{color:var(--accent)}
-.back{background:none;border:0;color:var(--mute);cursor:pointer;padding:2px 0 6px;font-size:14px;text-align:left}
-.track{display:flex;align-items:flex-start;margin:2px 0 10px}
-.step{flex:1;text-align:center;position:relative;font-size:12.5px;color:var(--mute);font-weight:600}
-.step .dot{width:26px;height:26px;border-radius:50%;margin:0 auto 4px;background:var(--card);border:2px solid var(--line);display:grid;place-items:center;font-size:13px;position:relative;z-index:1}
-.step:not(:first-child)::before{content:"";position:absolute;top:12px;right:50%;width:100%;height:2px;background:var(--line)}
-.step.done .dot{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.step.done,.step.now{color:var(--ink)}
-.step.done::before,.step.now::before{background:var(--accent)}
-.step.now .dot{border-color:var(--accent);box-shadow:0 0 0 4px var(--tint)}
-.step.bad .dot{background:var(--warn);border-color:var(--warn);color:#fff}
-.step.bad::before{background:var(--warn)}
-.status{border-radius:16px;padding:14px;margin:0 0 10px;background:var(--tint)}
-.status.warn{background:var(--warn-tint)}
-.status.bad{background:var(--bad-tint)}
-.status h2{margin:0 0 4px;font-size:19px;line-height:1.25}
-.status p{margin:0;font-size:14.5px;line-height:1.4}
-.clock{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;margin:2px 0 4px;letter-spacing:-.01em}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 10px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center;min-width:0}
-.stat b{display:block;font-size:16px;overflow-wrap:anywhere}
-.stat span{font-size:12px;color:var(--mute)}
-.savings{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:0 0 10px;font-size:15px}
-.savings h3{margin:0 0 4px;font-size:15px}
-.savings p{margin:2px 0}
-.savings .ok{color:var(--accent);font-weight:600}
-.savings .no{color:var(--bad);font-weight:600}
-details{margin:6px 0 0;font-size:14px}
-summary{cursor:pointer;color:var(--mute);padding:4px 0}
-dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:8px 0 0;font-size:13.5px}
-dt{color:var(--mute)}dd{margin:0;word-break:break-all}
-details p{margin:8px 0 0;color:var(--mute)}
-.stat small{display:block;font-size:11.5px;color:var(--mute);min-height:14px}
-.row{display:flex;gap:8px;align-items:end}
-.row>*{flex:1;min-width:0}
-select{font:inherit;color:inherit;padding:2px 4px;border:1px solid var(--line);border-radius:8px;background:var(--bg);margin-left:6px}
-.record{font-size:13.5px;color:var(--mute);margin:0 0 10px}
-.opt{display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:14px;color:var(--ink);cursor:pointer}
-.opt input{width:auto;margin-top:4px;flex:none}
-.opt .ok,.opt .no{font-weight:600}
-.mylist{margin:2px 0 0;font-size:14px;color:var(--mute)}
-.mylist button{margin:0 8px 0 0;font-size:14px}
-.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;z-index:5}
-.sheet{background:var(--card);border-radius:20px 20px 0 0;padding:16px 18px 18px;width:100%;max-height:92%;overflow:auto}
-.sheet h2{margin:0 0 8px;font-size:20px}
-.sheet h3{margin:12px 0 2px;font-size:15px}
-.sheet p{margin:6px 0;font-size:14.5px}
-.sheet ol{padding-left:20px;margin:8px 0 8px}
-.sheet li{margin:5px 0;font-size:14.5px}
-.sheet a{color:var(--accent)}
-.toast{position:absolute;left:16px;right:16px;bottom:76px;background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:12px;font-size:14px;text-align:center;z-index:9;opacity:0;pointer-events:none;transition:opacity .2s}
-.toast.show{opacity:1}
+html{-webkit-text-size-adjust:100%;background:var(--bg)}
+body{margin:0;min-height:100vh;min-height:100dvh;background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--font);font-feature-settings:"cv11","ss01";-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button,input,select{font:inherit;color:inherit}
 [hidden]{display:none!important}
-:root{color-scheme:light dark}
-.colA,.colB{display:contents}
-.desk{display:none}
-.side{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:0 0 12px}
-.side h2{font-size:18px;margin:0 0 6px}
-.side h3{font-size:15px;margin:12px 0 4px}
-.side p,.side li{font-size:14.5px;color:var(--ink)}
-.vlist{list-style:none;padding:0;margin:4px 0 0;display:flex;flex-wrap:wrap;gap:6px 14px}
-.vlist li{margin:0;font-size:14px}
-.vlist .ok{color:var(--accent);font-weight:600}
-@media (min-width:900px){
-  html,body{height:auto;min-height:100%}
-  body{padding:0 24px;display:block}
-  .app{max-width:1080px;margin:24px auto;min-height:calc(100vh - 48px);max-height:none;overflow:visible;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
-  header{padding:18px 32px 6px}
-  .brand{font-size:22px}
-  nav{order:1;display:flex;border-top:0;border-bottom:1px solid var(--line);background:transparent;padding:0 32px}
-  nav button{flex-direction:row;gap:8px;padding:12px 18px;font-size:15px;border-bottom:3px solid transparent}
-  nav button.on{border-bottom-color:var(--accent)}
-  main{order:2;overflow:visible;padding:26px 32px 44px;display:grid;grid-template-columns:1.05fr 1fr;gap:12px 44px;align-items:start}
-  .colA,.colB{display:block;min-width:0}
-  h1{font-size:34px;line-height:1.15;margin:0 0 10px}
-  .lead{font-size:16.5px;margin-bottom:16px}
-  .desk{display:block}
-  .mobileonly{display:none!important}
-  .card{padding:18px}
-  .sheet-bg{position:fixed;align-items:center;justify-content:center}
-  .sheet{max-width:560px;border-radius:20px}
-  .toast{position:fixed;bottom:24px;left:50%;right:auto;max-width:440px;transform:translateX(-50%)}
+a{color:var(--accent);text-underline-offset:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+.fig,.big,.stats b,.clock{font-variant-numeric:tabular-nums;font-feature-settings:"tnum","cv11"}
+svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* shell: phone first. bottom bar on phones, side menu from 800px */
+.shell{min-height:100vh;min-height:100dvh}
+.content{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;min-width:0}
+.sidenav{display:none}
+.top{position:sticky;top:0;z-index:20;height:56px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);background:var(--bar);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em;font-size:19px;color:var(--ink);text-decoration:none}
+.brand svg{width:28px;height:28px;flex:none}
+.brand .beta{font-size:11px;font-weight:600;letter-spacing:0;color:var(--mute);border:1px solid var(--line2);background:var(--surface);border-radius:8px;padding:2px 9px;margin-left:6px}
+.actions{display:flex;gap:10px;align-items:center}
+.hbtn{display:inline-flex;align-items:center;gap:9px;min-height:42px;border:1px solid var(--line2);background:var(--surface);border-radius:12px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;transition:border-color .15s,transform .1s}
+.hbtn:hover{border-color:var(--ok-line)}
+.hbtn:active{transform:scale(.98)}
+.hbtn .dot{width:20px;height:20px;border-radius:50%;background:#1b66ff;display:grid;place-items:center;flex:none}
+.hbtn .dot::after{content:"";width:8px;height:8px;border-radius:50%;background:#fff}
+.hbtn::after{content:"";width:7px;height:7px;border-right:1.6px solid var(--mute);border-bottom:1.6px solid var(--mute);transform:rotate(45deg) translateY(-2px);flex:none}
+#ngnBtn::after{display:none}
+#net{cursor:default}
+#wallet::before{content:"";width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7bf5cf,#16a577 70%);flex:none}
+main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:16px 16px 28px;display:flex;flex-direction:column;gap:12px;animation:rise .3s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.foot{margin:0;padding:0 16px 84px;text-align:center;font-size:13px}
+.foot a{color:var(--mute)}
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;height:calc(62px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface2);border-top:1px solid var(--line)}
+.bottom a{display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--mute);text-decoration:none;position:relative}
+.bottom a svg.i{width:20px;height:20px}
+.bottom a.on{color:var(--accent);font-weight:600}
+.bottom a.on::before{content:"";position:absolute;top:0;left:30%;right:30%;height:2px;border-radius:0 0 3px 3px;background:var(--accent)}
+
+/* show only on phone or only on desktop */
+@media (max-width:799px){.dk{display:none!important}}
+@media (min-width:800px){.ph{display:none!important}}
+
+/* shared pieces */
+.phh{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:2px 0 10px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mute)}
+.phh b{font-size:17px;color:var(--ink);font-weight:700;letter-spacing:-.01em}
+.t{font-weight:700;font-size:24px;line-height:1.2;letter-spacing:-.02em;margin:0}
+.t2{font-weight:700;font-size:18px;line-height:1.25;letter-spacing:-.015em;margin:0 0 6px}
+.s{color:var(--mute);font-size:14px}
+p{margin:0}
+.card{border:1px solid var(--line);border-radius:16px;padding:16px;background:var(--surface);box-shadow:var(--shadow);font-size:14.5px}
+.card.k{background:var(--surface2);box-shadow:none}
+.card p+p{margin-top:8px}
+.big{font-size:40px;font-weight:700;letter-spacing:-.04em;line-height:1.1}
+.big .s{font-size:16px;font-weight:600;letter-spacing:0}
+.chip{display:inline-flex;align-items:center;background:var(--tint);color:var(--accent);border:1px solid var(--ok-line);border-radius:99px;padding:2px 10px;font-size:12px;font-weight:600;white-space:nowrap;vertical-align:middle;line-height:1.5}
+.chip.w{background:var(--warn-tint);color:var(--warn);border-color:var(--warn-line)}
+.chip.b{background:var(--blue-tint);color:var(--blue);border-color:var(--blue-line)}
+.chip.m{background:var(--surface2);color:var(--mute);border-color:var(--line2)}
+.chip.bad{background:var(--bad-tint);color:var(--bad);border-color:var(--bad-line)}
+.btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:48px;padding:0 22px;border:1px solid var(--accent);border-radius:99px;background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:15px;text-align:center;text-decoration:none;cursor:pointer;transition:background .15s,transform .1s,border-color .15s}
+.btn:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn.o{background:transparent;color:var(--ink);border-color:var(--line2)}
+.btn.o:hover{border-color:var(--accent);background:transparent}
+.btn:disabled{background:var(--line);border-color:var(--line);color:var(--mute);cursor:not-allowed;font-size:14px;line-height:1.3;padding:8px 16px}
+.btns{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.f{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:50px;padding:0 14px;border:1px solid var(--line2);border-radius:12px;background:var(--surface);margin:0 0 8px;font-size:14.5px;cursor:text}
+.f:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--tint)}
+.f>span{color:var(--mute);font-weight:500;flex:none}
+input{border:0;outline:0;background:transparent;min-width:0}
+.f input{flex:1;text-align:right;font-size:15px;min-height:46px;padding:0}
+input::placeholder{color:var(--mute);opacity:.7}
+.plain{width:100%;min-height:52px;padding:0 14px;border:1px solid var(--line2);border-radius:12px;background:var(--surface)}
+.plain:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--tint)}
+select{min-height:36px;font-size:13px;font-weight:600;padding:0 26px 0 12px;border:1px solid var(--line2);border-radius:999px;background:var(--surface2);cursor:pointer}
+.msg{padding:12px 14px;border-radius:12px;font-size:14.5px;background:var(--tint);border:1px solid var(--ok-line)}
+.msg:empty{display:none}
+.msg.err{color:var(--bad);background:var(--bad-tint);border-color:var(--bad-line)}
+.hint{color:var(--mute);font-size:13.5px;line-height:1.45;margin-top:8px}
+.err{color:var(--bad)}
+.two{display:grid;grid-template-columns:1fr;gap:12px}
+.colA,.colB{display:flex;flex-direction:column;gap:12px;min-width:0}
+
+/* home, drawn from the dark mockup */
+.home{display:flex;flex-direction:column;gap:16px}
+.hero{display:grid;grid-template-columns:1fr;gap:20px;align-items:center}
+.hero-art{display:none}
+h1.home-t{font-size:36px;font-weight:700;letter-spacing:-.03em;line-height:1.1;margin:0}
+h1.home-t em{font-style:normal;color:var(--accent)}
+.hero .lead{margin:14px 0 22px;color:var(--mute);font-size:15px;line-height:1.5;max-width:340px}
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice{display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 24px;border-radius:99px;border:1px solid var(--line2);background:transparent;color:var(--ink);font-weight:600;font-size:15px;text-decoration:none;transition:border-color .15s,background .15s,transform .1s}
+.choice:active{transform:scale(.99)}
+.choice.g{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.choice.g:hover{background:var(--accent-hover)}
+.choice.o:hover{border-color:var(--accent)}
+.choice svg.i{width:17px;height:17px;stroke-width:2}
+.how{padding:20px 22px 18px;background:var(--surface)}
+.how h2{font-size:17px;font-weight:700;margin:0 0 20px;letter-spacing:-.01em}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);position:relative}
+.steps::before{content:"";position:absolute;top:15px;left:16.6%;right:16.6%;height:2px;background:var(--line2)}
+.steps::after{content:"";position:absolute;top:15px;left:16.6%;width:33.3%;height:2px;background:var(--accent)}
+.step{position:relative;z-index:1;text-align:center;padding:0 4px}
+.step i{width:31px;height:31px;border-radius:50%;display:grid;place-items:center;margin:0 auto 10px;font-style:normal;font-weight:700;font-size:14px;background:var(--surface);border:2px solid var(--line2);color:var(--ink)}
+.step.d i{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.step b{display:block;font-size:14px;font-weight:700}
+.step small{display:block;font-size:12px;color:var(--mute);line-height:1.35;margin-top:2px}
+.how .more{display:inline-flex;align-items:center;gap:6px;margin-top:16px;font-size:13.5px;font-weight:500;color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent);padding-bottom:1px}
+.how .more svg.i{width:14px;height:14px;stroke-width:2}
+.feats{display:grid;grid-template-columns:1fr;gap:12px}
+.feat{display:flex;gap:16px;align-items:center;padding:16px 18px;border-radius:16px;border:1px solid var(--line);background:var(--surface)}
+.feat .ic{width:44px;height:44px;border-radius:12px;background:var(--tint);border:1px solid var(--ok-line);color:var(--accent);display:grid;place-items:center;flex:none}
+.feat .ic svg.i{width:22px;height:22px}
+.feat b{display:block;font-size:15px;font-weight:700;margin-bottom:3px;letter-spacing:-.005em}
+.feat span{display:block;font-size:13px;line-height:1.45;color:var(--mute)}
+.lower{display:grid;grid-template-columns:1fr;gap:16px}
+.panel{border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:16px 18px 18px;min-width:0}
+.panel header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.panel h2{font-size:15px;font-weight:700;margin:0;letter-spacing:-.005em}
+.panel header a{font-size:13px;font-weight:500;color:var(--accent);text-decoration:none}
+.act{display:grid;grid-template-columns:30px 1.15fr 1fr auto;gap:14px;align-items:center;padding:7px 0;color:var(--ink);text-decoration:none;min-width:0}
+.act .ai{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--tint);color:var(--accent);border:1px solid var(--ok-line)}
+.act .ai.b{background:var(--blue-tint);color:var(--blue);border-color:var(--blue-line)}
+.act .ai.w{background:var(--bad-tint);color:#ff8a7a;border-color:var(--bad-line)}
+.act .ai svg.i{width:16px;height:16px}
+.act b{display:block;font-size:13.5px;font-weight:600;line-height:1.3}
+.act small{display:block;font-size:12px;color:var(--mute);line-height:1.35;margin-top:1px}
+.act .chip{justify-self:end}
+.act>div{min-width:0}
+.act>div b,.act>div small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{font-size:14px;color:var(--mute);padding:8px 0}
+.faq{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.faq details{border:1px solid var(--line2);border-radius:12px;background:var(--surface2);padding:0 16px}
+.faq summary{min-height:44px;font-size:13.5px;font-weight:500;gap:12px}
+.faq details p{font-size:13.5px;color:var(--mute);padding:0 0 14px;line-height:1.5}
+
+/* new request */
+.amtbox .s{display:block}
+.amtrow{display:flex;align-items:center;gap:10px}
+.amtrow input{flex:1;font-size:40px;font-weight:700;letter-spacing:-.04em;min-height:56px;padding:0;width:100%}
+.amtbox .money{margin:2px 0 14px;min-height:20px;font-size:14px;color:var(--mute)}
+.amtbox .money:empty{display:none}
+.unit{font-size:16px;font-weight:600;color:var(--mute)}
+@media (max-width:799px){
+  #newForm[data-step="1"] .p2,#newForm[data-step="1"] .s2{display:none}
+  #newForm[data-step="2"] .p1,#newForm[data-step="2"] .s1{display:none}
+}
+.tiles{display:flex;flex-direction:column;gap:8px}
+.opt{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:50px;padding:8px 14px;border:1px solid var(--line2);border-radius:12px;background:var(--surface);cursor:pointer;font-size:14.5px;transition:border-color .15s,background .15s}
+.opt:hover{border-color:var(--accent)}
+.opt input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
+.opt:has(input:checked){border-color:var(--accent);background:var(--tint);box-shadow:0 0 0 1px var(--accent)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.opt:has(input:disabled){opacity:.55;cursor:not-allowed;background:var(--surface2)}
+.opt .n{font-weight:600}
+.opt .r{text-align:right;font-size:13px;color:var(--mute);display:flex;flex-direction:column;align-items:flex-end;line-height:1.3}
+.opt .r b{font-size:14.5px;color:var(--ink);font-weight:600}
+.opt .r .ok{color:var(--accent);font-weight:600}
+.opt .r .no{color:var(--bad);font-weight:600}
+.lab{font-size:13px;font-weight:600;color:var(--ink);margin:6px 0 2px}
+.pvcard .big{font-size:34px}
+
+/* request page */
+.tl{display:flex;margin:6px 0}
+.tl>div{flex:1;font-size:12px;color:var(--mute);text-align:center;position:relative;padding-top:16px}
+.tl>div::before{content:"";position:absolute;top:2px;left:0;right:0;height:3px;background:var(--line2)}
+.tl>div:not(:first-child)::before{left:3px}
+.tl>div:not(:last-child)::before{right:3px}
+.tl .d::before{background:var(--accent)}
+.tl .d{color:var(--ink);font-weight:600}
+.prog{height:6px;border-radius:9px;background:var(--line2);overflow:hidden;margin:12px 0 8px}
+.prog i{display:block;height:100%;background:var(--accent);border-radius:9px}
+.clockrow{margin-top:6px}
+.clockrow b{color:var(--ink);font-variant-numeric:tabular-nums}
+.record{font-size:13.5px;color:var(--mute)}
+.need{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin:6px 0 10px;font-size:14px}
+.linkcard{word-break:break-all;font-size:14px}
+details{font-size:14.5px;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:0 16px}
+summary{cursor:pointer;font-weight:600;min-height:46px;display:flex;align-items:center;justify-content:space-between;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";width:7px;height:7px;border-right:1.8px solid var(--mute);border-bottom:1.8px solid var(--mute);transform:rotate(45deg);transition:transform .2s;margin-right:4px;flex:none}
+details[open]>summary::after{transform:rotate(-135deg)}
+dl{display:grid;grid-template-columns:1fr;gap:2px 12px;margin:0 0 14px;font-size:14px}
+dt{color:var(--mute);font-size:12.5px;font-weight:600;margin-top:10px}
+dd{margin:0;word-break:break-all}
+@media (max-width:799px){
+  .rq[data-sub="review"] .colB,.rq[data-sub="pledge"] .colA{display:none}
+}
+
+/* my requests and record */
+.tabs{display:flex;gap:6px;font-size:13px}
+.tabs button{flex:1;min-height:40px;border-radius:12px;background:var(--surface);color:var(--mute);font-weight:600;cursor:pointer;border:1px solid var(--line2)}
+.tabs button.on{background:var(--tint);border-color:var(--accent);color:var(--accent)}
+.list{display:flex;flex-direction:column;gap:10px}
+.rowcard{display:block;color:var(--ink);text-decoration:none}
+.rowcard .top2{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rowcard .top2 .chip{margin-left:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;color:var(--mute);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line2)}
+td{padding:12px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+td a{font-weight:600;text-decoration:none}
+td small{display:block;color:var(--mute);font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stats .card{padding:12px;font-size:12.5px;color:var(--mute);line-height:1.3}
+.stats .card b{display:block;font-size:26px;color:var(--ink);letter-spacing:-.03em;margin-bottom:2px}
+.lookupbtn{margin-top:2px}
+@media (min-width:800px){.lookupbtn{align-self:flex-start}}
+
+/* about */
+.about{display:flex;flex-direction:column;gap:12px}
+.about h2{font-size:18px;letter-spacing:-.015em;margin:8px 0 0}
+.about p,.about li{font-size:15px;margin:0}
+.about p+p{margin-top:8px}
+.story{border-left:3px solid var(--accent)}
+.about ol{list-style:none;counter-reset:s;padding:0;margin:0}
+.about ol li{counter-increment:s;position:relative;padding:0 0 12px 38px}
+.about ol li::before{content:counter(s);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--accent);font-weight:700;font-size:13px;border:1px solid var(--ok-line)}
+.vlist{display:flex;flex-direction:column;gap:8px}
+.vlist .opt{cursor:default;min-height:44px}
+.vlist .opt:hover{border-color:var(--line2)}
+.code{word-break:break-all;font-size:13.5px}
+
+/* loading */
+.sk{border-radius:14px;background:linear-gradient(90deg,var(--skel1) 25%,var(--skel2) 50%,var(--skel1) 75%);background-size:300% 100%;animation:shine 1.4s linear infinite}
+@keyframes shine{from{background-position:100% 0}to{background-position:-100% 0}}
+.toast{position:fixed;left:16px;right:16px;bottom:76px;background:var(--surface);border:1px solid var(--ok-line);color:var(--ink);padding:12px 16px;border-radius:14px;font-size:14.5px;font-weight:600;text-align:center;z-index:60;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:var(--shadow-lg)}
+.toast.show{opacity:1;transform:none}
+.demo{position:relative;z-index:70;background:var(--warn-tint);color:var(--warn);border-bottom:1px solid var(--warn-line);font-size:12px;font-weight:600;text-align:center;padding:2px 8px}
+@media (max-width:600px){.act{grid-template-columns:30px minmax(0,1fr) auto;gap:12px}.act>.chip{display:none}.act>div:nth-of-type(2){text-align:right}}
+@media (max-width:480px){#net,.top .beta,#wallet::before{display:none}.hbtn{padding:0 10px;gap:7px;font-size:13px}.top{padding:0 12px}.brand{font-size:18px;gap:8px}}
+
+/* tablet and up: two columns on the hero */
+@media (min-width:800px){
+  .hero{grid-template-columns:minmax(0,1fr) 340px;gap:24px}
+  .feats{grid-template-columns:repeat(3,1fr)}
+  .lower{grid-template-columns:1.05fr 1fr}
+  h1.home-t{font-size:40px}
+  .hero .lead{max-width:380px}
+  .choices{flex-direction:row;gap:14px}
+  .choice{padding:0 26px}
+}
+/* wide desktop: sidebar, text, picture and the card in one row */
+@media (min-width:1100px){
+  .hero{grid-template-columns:410px minmax(260px,1fr) 382px;gap:0;min-height:290px}
+  .hero-art{display:block;align-self:stretch;position:relative}
+  .hero-art svg{position:absolute;left:50%;top:50%;width:330px;height:auto;transform:translate(-50%,-50%);overflow:visible}
+  h1.home-t{font-size:50px;line-height:.98}
+  .hero .lead{max-width:335px;font-size:15px;line-height:1.55}
+}
+
+/* desktop: side menu replaces the bottom bar, forms get a live preview */
+@media (min-width:800px){
+  .shell{display:grid;grid-template-columns:clamp(196px,16.8vw,232px) minmax(0,1fr);align-items:start}
+  .sidenav{display:flex;flex-direction:column;gap:3px;position:sticky;top:0;height:100vh;height:100dvh;padding:24px 14px 22px;border-right:1px solid var(--line);background:var(--surface2)}
+  .sidenav .brand{padding:0 8px 34px;font-size:19px}
+  .sidenav a:not(.brand){display:flex;align-items:center;gap:14px;min-height:45px;padding:0 16px;border-radius:12px;color:var(--mute);text-decoration:none;font-size:15px;font-weight:500;transition:background .15s,color .15s}
+  .sidenav a:not(.brand):hover{color:var(--ink)}
+  .sidenav a.on{background:var(--tint)!important;color:var(--accent)!important}
+  .sidenav .btm{margin-top:auto}
+  .sidenav .btm~a{margin-top:0}
+  .bottom,.foot{display:none}
+  .top{justify-content:flex-end;background:transparent;border:0;-webkit-backdrop-filter:none;backdrop-filter:none;padding:0 16px 0 40px;height:72px}
+  .top .brand{display:none}
+  main{max-width:1180px;margin:0;padding:8px 16px 48px 40px;gap:16px}
+  .two{grid-template-columns:1.1fr 1fr;gap:22px;align-items:start}
+  .home .two{display:grid}
+  .colA,.colB{gap:14px}
+  .t{font-size:26px}
+  .big{font-size:36px}
+  .card{padding:20px}
+  .how{padding:22px 24px 20px}
+  .toast{left:50%;right:auto;width:max-content;max-width:440px;bottom:24px;transform:translate(-50%,8px)}
+  .toast.show{transform:translate(-50%,0)}
+  .btns{flex-direction:row;flex-wrap:wrap}
+  .btn{width:auto;min-height:46px;padding:0 26px}
+  .btn:disabled{width:auto}
+  .amtbox{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:12px;border:1px solid var(--line2);border-radius:12px;padding:2px 14px 6px;background:var(--surface);margin-bottom:8px}
+  .amtbox:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--tint)}
+  .amtbox>.s{font-size:14.5px;font-weight:500;padding-top:4px}
+  .amtrow{justify-content:flex-end}
+  .amtrow input{font-size:22px;min-height:44px;text-align:right}
+  .amtbox .money{grid-column:1/-1;text-align:right;margin:0}
+  .opt .r{font-size:13px}
+  #newForm .colB{position:sticky;top:12px}
+  .tabs{max-width:320px}
+  .stats .card{font-size:13.5px;padding:16px}
+  .stats .card b{font-size:28px}
+  .about{max-width:760px}
+  .share{max-width:520px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
 }
 </style>
 </head>
 <body>
 
-<div class="app" id="app">
-  <header>
-    <span class="brand">Amana</span>
-    <span style="display:flex;gap:6px"><button class="chip" id="ngnBtn" type="button" title="Show amounts in naira" hidden>&#8358; on</button><button class="chip" id="wallet" type="button">Connect wallet</button></span>
-  </header>
-
-  <main id="main"></main>
-
-  <nav id="nav" aria-label="Sections">
-    <button type="button" data-tab="sell"><span class="ic">&#9783;</span>I'm selling</button>
-    <button type="button" data-tab="buy"><span class="ic">&#9786;</span>I'm buying</button>
-  </nav>
-
-  <div class="toast" id="toast" role="status"></div>
-  <div class="sheet-bg" id="sheetBg" hidden>
-    <div class="sheet" id="sheet" role="dialog" aria-label="Information"></div>
+<div class="shell">
+  <aside class="sidenav" aria-label="Sections">
+    <a class="brand" href="#/home"><svg viewBox="0 0 28 28" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="8" fill="#0d2a20" stroke="var(--accent)" stroke-width="1.6"/><path d="M8.5 20V13.5a5.5 5.5 0 0 1 11 0V20" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"/><circle cx="14" cy="14.5" r="2.1" fill="var(--accent)"/></svg>Amana<span class="beta">Beta</span></a>
+    <a href="#/home" data-nav="home"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11 12 3.8l8.5 7.2V20a1 1 0 0 1-1 1H15v-6H9v6H4.5a1 1 0 0 1-1-1z"/></svg>Home</a>
+    <a href="#/new" data-nav="new"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>New request</a>
+    <a href="#/mine" data-nav="mine"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>My requests</a>
+    <a href="#/record" data-nav="record"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c0-3.8 3.4-6 7.5-6s7.5 2.2 7.5 6"/></svg>Buyer record</a>
+    <a href="#/about" data-nav="how" class="btm"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.2 1-1.2 1.8M12 17h.01"/></svg>How it works</a>
+    <a href="#/about" data-nav="about"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.6h.01"/></svg>About</a>
+  </aside>
+  <div class="content">
+    <header class="top">
+      <a class="brand" href="#/home"><svg viewBox="0 0 28 28" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="8" fill="#0d2a20" stroke="var(--accent)" stroke-width="1.6"/><path d="M8.5 20V13.5a5.5 5.5 0 0 1 11 0V20" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"/><circle cx="14" cy="14.5" r="2.1" fill="var(--accent)"/></svg>Amana<span class="beta">Beta</span></a>
+      <span class="actions"><button class="hbtn" id="ngnBtn" type="button" title="Show amounts in naira" hidden>&#8358; on</button><button class="hbtn" id="net" type="button" aria-label="Network: Arc"><span class="dot"></span>Arc</button><button class="hbtn" id="wallet" type="button">Connect wallet</button></span>
+    </header>
+    <main id="main"></main>
+    <p class="foot"><a href="#/about">About Amana</a></p>
   </div>
 </div>
+<nav class="bottom" aria-label="Sections">
+  <a href="#/home" data-nav="home"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11 12 3.8l8.5 7.2V20a1 1 0 0 1-1 1H15v-6H9v6H4.5a1 1 0 0 1-1-1z"/></svg>Home</a>
+  <a href="#/new" data-nav="new"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>New</a>
+  <a href="#/mine" data-nav="mine"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Mine</a>
+  <a href="#/record" data-nav="record"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c0-3.8 3.4-6 7.5-6s7.5 2.2 7.5 6"/></svg>Record</a>
+</nav>
+<div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
 <script>
@@ -164,13 +361,13 @@ const CFG = {
 };
 /* The fixed vault list inside the contract, in the same order. Only "live" ones can be chosen. */
 const VAULTS = [
-  { name: 'Aave USDC vault', short: 'Aave', address: '0x42EAB64310E1D1c66b4d8aF7C9C4ce253885eB83', live: true, dec: 6 },
-  { name: 'Steakhouse Prime USDC (Morpho)', short: 'Steakhouse', address: '0xbeef0016cb2Fd5C352ea7CA08a9f54739DFa7298', live: true, dec: 18 },
-  { name: 'Bitwise Premium RWA USDC (Morpho)', short: 'Bitwise', address: '0x7610094B846657dCF166D59e42973db52c7015F9', live: true, dec: 18 },
-  { name: 'Steakhouse Prime USDC, second vault (Morpho)', short: 'Steakhouse 2', address: '0xbeef0007d5A04246F5382957035Df34f7e82102e', live: false, dec: 18 },
-  { name: 'Keyrock Prime USDC (Morpho)', short: 'Keyrock', address: '0x5bEfAb92a5A3D60F578Cb51EEb4e4FD50a1e3123', live: false, dec: 18 },
-  { name: 'Galaxy USDC (Morpho)', short: 'Galaxy', address: '0x8E357432CC12ff425c36432F312968aEb16112AF', live: false, dec: 18 },
-  { name: 'Gauntlet USDC Prime (Morpho)', short: 'Gauntlet', address: '0xdECcd53BE5453215821184824B519E04C7e00bC7', live: false, dec: 18 }
+  { name: 'Aave USDC vault', label: 'Aave USDC', short: 'Aave', address: '0x42EAB64310E1D1c66b4d8aF7C9C4ce253885eB83', live: true, dec: 6 },
+  { name: 'Steakhouse Prime USDC (Morpho)', label: 'Steakhouse Prime', short: 'Steakhouse', address: '0xbeef0016cb2Fd5C352ea7CA08a9f54739DFa7298', live: true, dec: 18 },
+  { name: 'Bitwise Premium RWA USDC (Morpho)', label: 'Bitwise RWA', short: 'Bitwise', address: '0x7610094B846657dCF166D59e42973db52c7015F9', live: true, dec: 18 },
+  { name: 'Steakhouse Prime USDC, second vault (Morpho)', label: 'Steakhouse Prime 2', short: 'Steakhouse 2', address: '0xbeef0007d5A04246F5382957035Df34f7e82102e', live: false, dec: 18 },
+  { name: 'Keyrock Prime USDC (Morpho)', label: 'Keyrock Prime', short: 'Keyrock', address: '0x5bEfAb92a5A3D60F578Cb51EEb4e4FD50a1e3123', live: false, dec: 18 },
+  { name: 'Galaxy USDC (Morpho)', label: 'Galaxy USDC', short: 'Galaxy', address: '0x8E357432CC12ff425c36432F312968aEb16112AF', live: false, dec: 18 },
+  { name: 'Gauntlet USDC Prime (Morpho)', label: 'Gauntlet Prime', short: 'Gauntlet', address: '0xdECcd53BE5453215821184824B519E04C7e00bC7', live: false, dec: 18 }
 ];
 const LIVE_MASK = VAULTS.reduce((m, v, i) => (v.live ? m | (1 << i) : m), 0);
 const inMask = (mask, i) => ((Number(mask) >> i) & 1) === 1;
@@ -198,21 +395,31 @@ const VAULT_ABI = [...ERC_ABI, 'function convertToAssets(uint256) view returns (
 const STATES = ['NONE', 'OPEN', 'PLEDGED', 'PAID', 'CLAIMED', 'RELEASED', 'RECLAIMED', 'CANCELLED'];
 const GRACE = 3600, RECLAIM = 30 * 86400, MAX_TERM = 365 * 86400;
 
+/* ?demo=1 only draws sample screens with made-up data. It never connects a wallet and never sends anything. */
+const Q = new URLSearchParams(location.search);
+const DEMO = Q.get('demo') === '1';
+const DEMO_AS = Q.get('as') || 'visitor';
+const DEMO_ME = '0x00000000000000000000000000000000000000aa';
+const DEMO_SELLER = '0xb3fb' + '0'.repeat(32) + '2b53';
+const DEMO_BUYER = '0x4c00' + '0'.repeat(32) + '91aa';
+
 const $ = (s, r = document) => r.querySelector(s);
 const main = $('#main');
-const S = { screen: 'home', tab: 'sell', cur: null, msg: null, mine: [], target: 0 };
+const S = { screen: 'home', step: 1, sub: '', reqId: null, cur: null, msg: null, target: 0, mtab: 'owed', minelist: undefined, all: null, accept: null, act: undefined };
 let read, signer, account, hfR, vaultRs;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function retry(fn, n = 5) { for (let i = 0; ; i++) { try { return await fn(); } catch (e) { if (i >= n - 1 || !/32014|timeout|fetch|network|503|502/i.test(String(e.message))) throw e; await sleep(800 * (i + 1)); } } }
 
 const num = (n, min = 0, max = 4) => (Number(n) / 1e6).toLocaleString(undefined, { minimumFractionDigits: min, maximumFractionDigits: max });
 const usd = (n) => num(n, 0, 6) + ' USDC';
+const worth0 = (n) => num(n, 0, 2) + ' USDC';
 const worthTxt = (n) => num(n, 2, 4) + ' USDC';
-const shortAddr = (a) => a.slice(0, 6) + '...' + a.slice(-4);
+const shortAddr = (a) => a.slice(0, 6) + '…' + a.slice(-4);
 const dateTxt = (t) => new Date(Number(t) * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 const dateShort = (t) => new Date(Number(t) * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 const dateTime = (t) => new Date(Number(t) * 1000).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 const nowSec = () => Math.floor(Date.now() / 1000);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 /* naira: USDC stays the real money, naira is only shown next to it, from a live rate */
 const N = { rate: null, on: true };
@@ -252,30 +459,51 @@ function rateNote() {
   const mins = Math.max(0, Math.round((nowSec() - N.at) / 60));
   return `Naira rate: ₦${N.rate.toLocaleString('en-NG', { maximumFractionDigits: 2 })} per USDC from ${N.src}, ${mins < 1 ? 'just now' : mins + ' min ago'}. It changes all the time, and the amount stays fixed in USDC.`;
 }
-function paintRateNote() { const el = $('#rateNote'); if (el) el.textContent = N.on ? rateNote() : ''; }
+function paintRateNote() { document.querySelectorAll('.rateNote').forEach((el) => { el.textContent = N.on ? rateNote() : ''; }); }
+
+/* keep what the person typed when the screen is drawn again (for example when the naira rate arrives) */
+const KEEP = ['amt', 'due', 'who', 'unit', 'payAmt', 'num', 'rwal'];
 function repaint() {
-  if (S.screen === 'request' && S.cur && S.cur.r) { const pa = $('#payAmt') && $('#payAmt').value; S.cur.html = requestHtml(S.cur); render(); if (pa && $('#payAmt')) { $('#payAmt').value = pa; $('#payAmt').dispatchEvent(new Event('input', { bubbles: true })); } fillRecord(S.cur); }
-  else if (S.screen === 'home') { const a = $('#amt') && $('#amt').value, d = $('#due') && $('#due').value, w = $('#who') && $('#who').value, u = $('#unit') && $('#unit').value; render(); if (a) $('#amt').value = a; if (d) $('#due').value = d; if (w) $('#who').value = w; if (u && $('#unit')) $('#unit').value = u; updateHelper(); }
+  const saved = {}; KEEP.forEach((i) => { const e = $('#' + i); if (e) saved[i] = e.value; });
+  if (S.screen === 'request' || S.screen === 'share') { if (!S.cur || !S.cur.r) return; }
+  if (S.screen === 'mine' && S.minelist === undefined) return;
+  render();
+  KEEP.forEach((i) => { const e = $('#' + i); if (e && saved[i] !== undefined) e.value = saved[i]; });
+  if (saved.payAmt !== undefined && $('#payAmt')) $('#payAmt').dispatchEvent(new Event('input', { bubbles: true }));
+  updateHelper();
+  if (S.cur && S.cur.r) fillRecord(S.cur);
+  if (S.screen === 'mine') paintMine();
 }
 
-/* a buyer's record on Amana, counted from the requests on the contract */
+/* every request on the contract (newest first), used for My requests and for buyer records */
 async function allRequests() {
   if (S.all) return S.all;
   const n = Number(await retry(() => hfR.requestCount()));
   const ids = []; for (let i = n; i >= 1 && ids.length < 300; i--) ids.push(i);
   const out = [];
-  for (let i = 0; i < ids.length; i += 25) out.push(...await Promise.all(ids.slice(i, i + 25).map((id) => retry(() => hfR.getRequest(id)))));
+  for (let i = 0; i < ids.length; i += 25) {
+    const part = await Promise.all(ids.slice(i, i + 25).map((id) => retry(() => hfR.getRequest(id)).then((r) => ({ id, r }))));
+    out.push(...part);
+  }
   S.all = out; return out;
 }
+function countFor(all, wallet) {
+  const b = wallet.toLowerCase(); let paid = 0, missed = 0, active = 0, total = 0;
+  for (const { r } of all) {
+    if (r.buyer.toLowerCase() !== b) continue;
+    total++;
+    const s = STATES[Number(r.state)];
+    if (s === 'PAID') paid++; else if (s === 'CLAIMED') missed++; else if (s === 'PLEDGED') active++;
+  }
+  return { paid, missed, active, total };
+}
 async function fillRecord(c) {
-  if (!c || !c.r || c.r.buyer === ethers.ZeroAddress) return;
+  if (!c || !c.r || c.r.buyer === ethers.ZeroAddress || DEMO) return;
   try {
-    const all = await allRequests(); const b = c.r.buyer.toLowerCase();
-    let paid = 0, missed = 0, active = 0;
-    for (const r of all) { if (r.buyer.toLowerCase() !== b) continue; const s = STATES[Number(r.state)]; if (s === 'PAID') paid++; else if (s === 'CLAIMED') missed++; else if (s === 'PLEDGED') active++; }
+    const all = await allRequests(); const k = countFor(all, c.r.buyer);
     const el = $('#rec'); if (!el) return;
-    el.textContent = paid + missed + active === 0 ? 'This buyer has no finished requests on Amana yet.'
-      : `This buyer on Amana: paid in full ${paid}, seller had to claim ${missed}, still open ${active}.`;
+    el.textContent = k.paid + k.missed + k.active === 0 ? 'This buyer has no finished requests on Amana yet.'
+      : `This buyer on Amana: paid in full ${k.paid}, seller had to claim ${k.missed}, still open ${k.active}.`;
   } catch {}
 }
 
@@ -302,6 +530,7 @@ function setup() {
 
 const NO_WALLET = 'You need a crypto wallet for this, such as MetaMask or Rabby. Install one in this browser, then reload the page.';
 async function connect() {
+  if (DEMO) { toast('Demo screens only. Nothing is sent.'); return false; }
   if (!window.ethereum) { setMsg(NO_WALLET, true); if (!$('#msg')) toast(NO_WALLET); return false; }
   try {
     const bp = new ethers.BrowserProvider(window.ethereum);
@@ -318,9 +547,10 @@ async function connect() {
     return true;
   } catch (e) { setMsg('Could not connect your wallet: ' + friendly(e), true); return false; }
 }
-const ensure = async () => { if (!signer && !(await connect())) return false; return true; };
+const ensure = async () => { if (DEMO) { toast('Demo screens only. Nothing is sent.'); return false; } if (!signer && !(await connect())) return false; return true; };
 
 async function tx(label, fn) {
+  if (DEMO) return false;
   setMsg(label + ': confirm in your wallet...');
   try {
     const t = await fn();
@@ -329,6 +559,7 @@ async function tx(label, fn) {
     const text = label + ' done.';
     const id = S.cur.id;
     S.msg = { text, err: false, href: `${CFG.explorer}/tx/${rc.hash}`, hrefText: 'See it on the explorer' };
+    S.all = null;
     await loadRequest(id, true);
     return true;
   } catch (e) { setMsg(label + ' failed: ' + friendly(e), true); return false; }
@@ -342,22 +573,332 @@ function friendly(e) {
   return m.slice(0, 160);
 }
 
-/* ---------- pieces ---------- */
-function track(state, late) {
-  const final = { PAID: 'Paid', CLAIMED: 'Claimed', RELEASED: 'Released', RECLAIMED: 'Taken back', CANCELLED: 'Cancelled' }[state] || 'Paid or claimed';
-  const cls = {
-    OPEN: ['done', 'now', ''], PLEDGED: ['done', 'done', 'now'], PAID: ['done', 'done', 'done'],
-    CLAIMED: ['done', 'done', 'bad'], RELEASED: ['done', 'done', 'done'], RECLAIMED: ['done', 'done', 'bad'], CANCELLED: ['done', 'bad', '']
-  }[state];
-  const names = ['Request made', 'Pledged', final];
-  return '<div class="track" aria-label="Progress">' + names.map((n, i) =>
-    `<div class="step ${cls[i]}"><div class="dot">${cls[i] === 'done' || cls[i] === 'bad' ? '&#10003;' : i + 1}</div>${n}</div>`).join('') + '</div>';
-}
-const stats = (o, p, d, on = '', pn = '') => `<div class="stats"><div class="stat"><b>${o}</b><small>${on}</small><span>owed</span></div><div class="stat"><b>${p}</b><small>${pn}</small><span>pledged</span></div><div class="stat"><b>${d}</b><small></small><span>due</span></div></div>`;
-function clockTxt(sec) {
+/* ---------- small pieces ---------- */
+const shareLink = (id) => location.origin + location.pathname + '?id=' + id;
+const clockTxt = (sec) => {
   sec = Math.max(0, sec);
   const d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
   return `${d}d ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+};
+function chipFor(state, late) {
+  const m = { OPEN: ['Waiting for pledge', 'w'], PLEDGED: late ? ['Overdue', 'w'] : ['Pledged', ''], PAID: ['Done', ''], CLAIMED: ['Claimed', 'w'], RELEASED: ['Released', ''], RECLAIMED: ['Taken back', 'w'], CANCELLED: ['Cancelled', 'w'] }[state];
+  return `<span class="chip ${m[1]}">${m[0]}</span>`;
+}
+const phHead = (title, right = '') => `<div class="phh ph"><b>${title}</b><span>${right}</span></div>`;
+const skeletonHtml = () => `<div class="sk" style="height:34px;width:180px"></div><div class="two"><div class="sk" style="height:170px"></div><div class="sk" style="height:170px"></div></div><div class="sk" style="height:48px"></div>`;
+const backHome = '<a class="btn" href="#/home">Back home</a>';
+
+/* ---------- screens ---------- */
+const HOME_ART = `<svg viewBox="0 0 300 290" role="img" aria-label="A calendar with a green tick, a coin, and a Payment secured card" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="gl" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#2fe5a6" stop-opacity=".45"/><stop offset=".6" stop-color="#2fe5a6" stop-opacity=".12"/><stop offset="1" stop-color="#2fe5a6" stop-opacity="0"/></radialGradient>
+    <linearGradient id="cal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16231f"/><stop offset="1" stop-color="#0a1411"/></linearGradient>
+    <linearGradient id="coin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a5560"/><stop offset="1" stop-color="#1c232a"/></linearGradient>
+  </defs>
+  <ellipse cx="148" cy="246" rx="150" ry="40" fill="url(#gl)"/>
+  <ellipse cx="148" cy="248" rx="112" ry="23" fill="#07100d" stroke="#2fe5a6" stroke-width="2" stroke-opacity=".85"/>
+  <ellipse cx="148" cy="244" rx="92" ry="17" fill="#0a1713" stroke="#2fe5a6" stroke-width="1" stroke-opacity=".45"/>
+  <g transform="translate(40 8) skewY(3)">
+    <rect x="0" y="6" width="136" height="164" rx="14" fill="url(#cal)" stroke="#2c3d36" stroke-width="2"/>
+    <rect x="0" y="6" width="136" height="30" rx="14" fill="#0c1a15"/>
+    <rect x="0" y="22" width="136" height="14" fill="#0c1a15"/>
+    <rect x="28" y="-4" width="8" height="22" rx="4" fill="#3b4a44"/>
+    <rect x="100" y="-4" width="8" height="22" rx="4" fill="#3b4a44"/>
+    <g fill="#26342f">
+      <rect x="14" y="48" width="18" height="16" rx="4"/><rect x="38" y="48" width="18" height="16" rx="4"/><rect x="62" y="48" width="18" height="16" rx="4"/><rect x="86" y="48" width="18" height="16" rx="4"/><rect x="108" y="48" width="16" height="16" rx="4"/>
+      <rect x="14" y="70" width="18" height="16" rx="4"/><rect x="38" y="70" width="18" height="16" rx="4"/><rect x="62" y="70" width="18" height="16" rx="4"/><rect x="108" y="70" width="16" height="16" rx="4"/>
+      <rect x="14" y="92" width="18" height="16" rx="4"/><rect x="38" y="92" width="18" height="16" rx="4"/><rect x="62" y="92" width="18" height="16" rx="4"/><rect x="86" y="92" width="18" height="16" rx="4"/><rect x="108" y="92" width="16" height="16" rx="4"/>
+    </g>
+    <rect x="86" y="70" width="18" height="16" rx="4" fill="#0f3a2c" stroke="#2fe5a6" stroke-width="2"/>
+    <rect x="92" y="75" width="6" height="6" rx="1.5" fill="#2fe5a6"/>
+  </g>
+  <g transform="translate(20 112)">
+    <rect x="0" y="0" width="122" height="104" rx="12" fill="#0b1713" stroke="#2fe5a6" stroke-opacity=".5" stroke-width="1.5"/>
+    <circle cx="61" cy="30" r="21" fill="#0f3a2c" stroke="#2fe5a6" stroke-width="2"/>
+    <path d="M51 30.5l7 7 13-14.5" fill="none" stroke="#2fe5a6" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="61" y="76" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="600" fill="#f3f7f5">Payment</text>
+    <text x="61" y="94" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="600" fill="#f3f7f5">secured</text>
+  </g>
+  <g transform="translate(214 176)">
+    <ellipse cx="0" cy="42" rx="44" ry="10" fill="#000" opacity=".5"/>
+    <circle cx="0" cy="0" r="42" fill="url(#coin)" stroke="#6b7782" stroke-width="2.5"/>
+    <circle cx="0" cy="0" r="32" fill="#10171c" stroke="#33414b" stroke-width="1.5"/>
+    <text x="0" y="12" text-anchor="middle" font-family="Inter,system-ui,sans-serif" font-size="36" font-weight="700" fill="#cfd8de">$</text>
+  </g>
+</svg>`;
+const ICO = (d) => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const ARROW = '<path d="M5 12h14M13 6l6 6-6 6"/>';
+function homeHtml() {
+  return `<div class="home">
+    <section class="hero">
+      <div class="hero-t">
+        <h1 class="t home-t">Get paid on the date you <em>agreed</em>.</h1>
+        <p class="lead">Your customer backs the promise with savings they already hold. Nothing is sold.</p>
+        <div class="choices">
+          <a class="choice g" href="#/new">I am owed money ${ICO(ARROW)}</a>
+          <a class="choice o" href="#/open">${ICO('<path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/>')} I got a link</a>
+        </div>
+      </div>
+      <div class="hero-art">${HOME_ART}</div>
+      <div class="card how"><h2>How it goes</h2>
+        <div class="steps"><div class="step d"><i>1</i><b>Ask</b><small>Seller makes a request</small></div><div class="step"><i>2</i><b>Pledge</b><small>Buyer backs it with savings</small></div><div class="step"><i>3</i><b>Pay or claim</b><small>Buyer pays, or seller claims</small></div></div>
+        <a class="more" href="#/about">How it works, in full ${ICO(ARROW)}</a>
+      </div>
+    </section>
+    <section class="feats">
+      <div class="feat"><span class="ic">${ICO('<path d="M12 3 5 6v5.5c0 4.4 2.9 8 7 9.5 4.1-1.5 7-5.1 7-9.5V6z"/><path d="m9 12 2.2 2.2L15.4 10"/>')}</span><div><b>Built on your savings</b><span>Funds are backed by what the buyer already holds. Nothing is sold.</span></div></div>
+      <div class="feat"><span class="ic">${ICO('<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5M12 14.5v2.5"/>')}</span><div><b>Transparent and fair</b><span>Everything is on Arc. Clear terms for both sides.</span></div></div>
+      <div class="feat"><span class="ic">${ICO('<circle cx="9" cy="8.5" r="3.2"/><path d="M3 19c0-3.2 2.7-5 6-5s6 1.8 6 5"/><circle cx="17" cy="9.5" r="2.5"/><path d="M17 14c2.6 0 4.5 1.5 4.5 4"/>')}</span><div><b>Simple for everyone</b><span>Create a request, share a link, and get paid on the agreed date.</span></div></div>
+    </section>
+    <section class="lower">
+      <div class="panel"><header><h2>Recent activity</h2><a href="#/mine">View all</a></header><div id="actBody">${actHtml()}</div></div>
+      <div class="panel"><header><h2>Common questions</h2></header>
+        <div class="faq">
+          <details><summary>What happens if the buyer doesn't pay?</summary><p>One hour after the due date, the seller can claim only what is owed. Whatever is left of the pledge goes back to the buyer in the same step.</p></details>
+          <details><summary>Do I lose my funds?</summary><p>If you pay by the date, you get every pledged share back. If you do not, the seller takes only shares worth what you owe, and the rest comes back to you. A vault can pause, so cashing out can sometimes wait.</p></details>
+          <details><summary>Which networks are supported?</summary><p>Only Arc. Amana runs on Arc mainnet, in USDC.</p></details>
+        </div>
+      </div>
+    </section>
+  </div>`;
+}
+
+/* recent activity on the home screen: real requests read from the contract (made-up rows in ?demo=1) */
+const AGO = (t) => { const m = Math.max(0, Math.floor((nowSec() - t) / 60)); return m < 1 ? 'just now' : m < 60 ? m + (m === 1 ? ' minute ago' : ' minutes ago') : m < 1440 ? Math.floor(m / 60) + (m < 120 ? ' hour ago' : ' hours ago') : Math.floor(m / 1440) + (m < 2880 ? ' day ago' : ' days ago'); };
+const TICK = '<path d="m5 12.5 4.5 4.5L19 7.5"/>';
+const ACT = {
+  OPEN: ['New request', 'Pending', 'w', '<path d="M12 5v14M5 12h14"/>'],
+  PLEDGED: ['Request pledged', 'Pledged', 'b', '<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>'],
+  PAID: ['Payment received', 'Completed', '', TICK],
+  CLAIMED: ['Payment claimed', 'Completed', '', TICK],
+  RELEASED: ['Pledge released', 'Completed', '', TICK],
+  RECLAIMED: ['Pledge taken back', 'Completed', '', TICK],
+  CANCELLED: ['Request cancelled', 'Cancelled', 'm', '<path d="M6 6l12 12M18 6 6 18"/>']
+};
+function actHtml() {
+  if (S.act === undefined) return '<div class="sk" style="height:132px"></div>';
+  if (S.act === null) return '<p class="empty">Could not read Arc right now. Reload in a moment.</p>';
+  if (!S.act.length) return '<p class="empty">No requests yet. The first one will show here.</p>';
+  return S.act.map((x) => {
+    const m = ACT[x.state] || ACT.OPEN;
+    const ic = m[2] === 'b' ? 'b' : m[2] === 'w' ? 'w' : '';
+    return `<a class="act" href="#/request/${x.id}"><span class="ai ${ic}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true">${m[3]}</svg></span><div><b>${m[0]}</b><small>${esc(shortAddr(x.seller))}</small></div><div><b class="fig">${usd(x.amount)}</b><small>${x.ts ? 'Made ' + AGO(x.ts) : 'Request #' + x.id}</small></div><span class="chip ${m[2]}">${m[1]}</span></a>`;
+  }).join('');
+}
+/* when each request was made: the RPC only allows short log ranges, so look back in slices, newest first, and remember the answers */
+async function createdTimes(ids) {
+  let known = {}; try { known = JSON.parse(localStorage.getItem('amana_born') || '{}'); } catch {}
+  const need = ids.filter((id) => !known[id]);
+  if (need.length) {
+    try {
+      const head = await retry(() => read.getBlockNumber()), SLICE = 9000, found = {};
+      for (let h = head; h >= CFG.deployBlock && need.some((id) => !found[id]); h -= SLICE) {
+        const l = Math.max(CFG.deployBlock, h - SLICE + 1); await sleep(250);
+        let evs = null;
+        for (let t = 0; t < 3 && !evs; t++) { try { evs = await hfR.queryFilter(hfR.filters.RequestCreated(), l, h); } catch { await sleep(600 * (t + 1)); } }
+        for (const e of evs || []) { const id = Number(e.args.id); if (need.includes(id)) found[id] = e.blockNumber; }
+      }
+      for (const id of need) if (found[id]) known[id] = (await retry(() => read.getBlock(found[id]))).timestamp;
+      try { localStorage.setItem('amana_born', JSON.stringify(known)); } catch {}
+    } catch {}
+  }
+  return known;
+}
+/* shares the seller received in a claim: the RPC only allows short log ranges, so look back in slices, newest first, and remember the answer */
+async function claimedShares(id) {
+  let known = {}; try { known = JSON.parse(localStorage.getItem('amana_claimed') || '{}'); } catch {}
+  if (known[id]) return BigInt(known[id]);
+  try {
+    const head = await retry(() => read.getBlockNumber()), SLICE = 9000;
+    for (let h = head; h >= CFG.deployBlock; h -= SLICE) {
+      const l = Math.max(CFG.deployBlock, h - SLICE + 1); await sleep(250);
+      let evs = null;
+      for (let t = 0; t < 3 && !evs; t++) { try { evs = await hfR.queryFilter(hfR.filters.Claimed(id), l, h); } catch { await sleep(600 * (t + 1)); } }
+      if (evs === null) return null;
+      if (evs.length) {
+        const v = evs[evs.length - 1].args.sharesToSeller;
+        try { known[id] = v.toString(); localStorage.setItem('amana_claimed', JSON.stringify(known)); } catch {}
+        return v;
+      }
+    }
+  } catch {}
+  return null;
+}
+async function loadActivity() {
+  const paint = () => { const b = $('#actBody'); if (b && S.screen === 'home') b.innerHTML = actHtml(); };
+  if (DEMO) {
+    const t = nowSec(), a = DEMO_SELLER;
+    S.act = [{ id: 105, state: 'PAID', amount: 50000000n, seller: a, ts: t - 3600 }, { id: 102, state: 'PLEDGED', amount: 200000000n, seller: a, ts: t - 3 * 3600 }, { id: 101, state: 'OPEN', amount: 120000000n, seller: a, ts: t - 5 * 3600 }];
+    paint(); return;
+  }
+  if (S.act !== undefined && S.act !== null) { paint(); return; }
+  try {
+    const n = Number(await retry(() => hfR.requestCount()));
+    if (!n) { S.act = []; paint(); return; }
+    const ids = []; for (let i = n; i >= 1 && ids.length < 3; i--) ids.push(i);
+    const times = await createdTimes(ids);
+    S.act = await Promise.all(ids.map(async (id) => {
+      const r = await retry(() => hfR.getRequest(id));
+      const ts = times[id] || 0;
+      return { id, state: STATES[Number(r.state)], amount: r.amount, seller: r.seller, ts };
+    }));
+  } catch (e) { S.act = null; }
+  paint();
+}
+
+function newHtml(step) {
+  const picked = S.accept || VAULTS.map((v, i) => i).filter((i) => VAULTS[i].live);
+  const tiles = VAULTS.map((v, i) => `<label class="opt"><input type="checkbox" name="accept" value="${i}" ${picked.includes(i) && v.live ? 'checked' : ''} ${v.live ? '' : 'disabled'}><span class="n">${v.label}</span>${v.live ? '<span class="r">Open</span>' : '<span class="chip w">Soon</span>'}</label>`).join('');
+  return `<div id="newForm" data-step="${step}">
+    <div class="phh ph s1"><b>New request</b><span>Step 1 of 2</span></div>
+    <div class="phh ph s2"><b>Which savings?</b><span>Step 2 of 2</span></div>
+    <h1 class="t dk">New request</h1>
+    <div class="two" style="margin-top:12px">
+      <div class="colA">
+        <div class="p1">
+          <div class="amtbox"><span class="s">Amount</span>
+            <div class="amtrow"><input id="amt" inputmode="decimal" placeholder="200" value="200" autocomplete="off" aria-label="Amount">${N.rate ? '<select id="unit" aria-label="Currency"><option value="USDC">USDC</option><option value="NGN">Naira</option></select>' : '<span class="unit">USDC</span>'}</div>
+            <p class="money" id="ngnLine" aria-live="polite"></p></div>
+          <label class="f"><span>Due date</span><input id="due" type="date"></label>
+          <label class="f"><span>Buyer wallet</span><input id="who" placeholder="optional" autocomplete="off" spellcheck="false"></label>
+          <div class="btns ph"><button class="btn" type="button" data-next>Next</button></div>
+        </div>
+        <div class="p2">
+          <p class="lab dk">Savings you accept</p>
+          <div class="tiles">${tiles}</div>
+          <p class="hint helper"></p>
+          <div class="btns ph"><button class="btn g" type="button" data-create>Create request</button></div>
+        </div>
+      </div>
+      <div class="colB dk">
+        <div class="card k pvcard"><p class="s">What your customer will see</p>
+          <div class="big fig"><span id="pvAmt">200</span> <span class="s">USDC</span></div>
+          <p class="s" id="pvNgn"></p>
+          <p style="margin-top:10px" id="pvTerms"></p></div>
+        <div class="btns"><button class="btn g" type="button" data-create>Create request</button></div>
+        <p class="hint rateNote">${N.on ? rateNote() : ''}</p>
+      </div>
+    </div>
+    ${msgEl}
+  </div>`;
+}
+
+function openHtml() {
+  return `${phHead('Open a request', 'From a link')}<h1 class="t dk">Open a request</h1>
+    <div class="share"><p class="s" style="margin:4px 0 12px">Type the number the seller gave you. If you have a link, just open the link.</p>
+    <input class="plain fig" id="num" inputmode="numeric" placeholder="Request number, like 12" style="font-size:20px;font-weight:700;min-height:58px">
+    <div class="btns"><button class="btn g" type="button" data-openreq>Open request</button></div></div>
+    ${msgEl}`;
+}
+
+function aboutHtml() {
+  return `${phHead('About Amana', 'Why and how')}<h1 class="t dk">About Amana</h1>
+  <div class="about">
+    <div class="card story"><h2 style="margin-top:0">Why this exists</h2>
+      <p>I have a shop. Some of my customers keep their money in Aave or Morpho, earning yield, and they don't want to unlock it just to buy something from me. But I can't trust that they will bring the money later on their own.</p>
+      <p>So the customer pledges 105% of what they owe me, using the savings they already have in Aave or Morpho. They don't cash anything out, so the money keeps earning. We lock it until a due date, and the customer picks the date or we choose it together.</p>
+      <p>If they pay before that date, they get everything back, and they kept earning the whole time. If they don't, I can claim only what I am owed, and the rest goes straight back to them.</p></div>
+    <h2>How it works, with 200 USDC due in 30 days</h2>
+    <div class="card"><ol>
+      <li>You make a request for 200 USDC due in 30 days and send the buyer the link.</li>
+      <li>The buyer pledges 210 USDC worth of vault shares, for example from Aave or Morpho. Those shares keep earning interest for them.</li>
+      <li>If the buyer pays, you get 200 USDC and they get every share back.</li>
+      <li>If the buyer does not pay, you can claim one hour after the due date. You take only the shares worth 200 USDC, and the rest goes back to the buyer in the same step.</li>
+    </ol>
+    <p>A smart contract holds the pledge. It has no owner, no fees, and nobody can change its rules. If you do not claim, the buyer can take the pledge back 30 days after your claim opens.</p></div>
+    <h2>What Amana cannot check</h2>
+    <div class="card"><p>It cannot tell whether goods arrived. It only enforces the pledge and the date.</p></div>
+    <h2>Limits, honestly</h2>
+    <div class="card"><p>A vault can halt or run short of cash, so cashing out claimed shares may have to wait. The seller is paid in vault shares, which they cash out. Use small amounts.</p></div>
+    <h2>Savings you can pledge</h2>
+    <div class="vlist">${VAULTS.map((v) => `<div class="opt"><span class="n">${v.name}</span>${v.live ? '<span class="chip">Open</span>' : '<span class="chip w">Soon</span>'}</div>`).join('')}</div>
+    <h2>The contract</h2>
+    <div class="card"><p><span class="chip">Live on Arc mainnet</span></p>
+      <p class="code" style="margin-top:10px">${CFG.amana}</p>
+      <p style="margin-top:10px"><a href="${CFG.explorer}/address/${CFG.amana}" target="_blank" rel="noopener">View the contract on the explorer</a></p>
+      <p><a href="${CFG.readme}" target="_blank" rel="noopener">Read the code, the tests and the limits</a></p></div>
+    <p class="hint rateNote">${N.on ? rateNote() : ''}</p>
+  </div>`;
+}
+
+/* my requests: cards on a phone, a table on a big screen */
+function mineHtml() {
+  return `${phHead('My requests', '')}<h1 class="t dk">My requests</h1>
+    <div class="tabs"><button type="button" data-mtab="owed" class="${S.mtab === 'owed' ? 'on' : ''}">I am owed</button><button type="button" data-mtab="owe" class="${S.mtab === 'owe' ? 'on' : ''}">I owe</button></div>
+    <div id="mineBody"></div>`;
+}
+function paintMine() {
+  const box = $('#mineBody'); if (!box) return;
+  document.querySelectorAll('[data-mtab]').forEach((b) => b.classList.toggle('on', b.dataset.mtab === S.mtab));
+  if (!account && !DEMO) { box.innerHTML = '<div class="card"><p>Connect your wallet to see the requests you made and the ones you owe.</p><div class="btns"><button class="btn g" type="button" id="wallet2">Connect wallet</button></div></div>'; const b = $('#wallet2'); if (b) b.onclick = () => $('#wallet').click(); return; }
+  if (S.minelist === undefined) { box.innerHTML = '<div class="sk" style="height:120px"></div>'; return; }
+  if (S.minelist === null) { box.innerHTML = '<div class="card"><p>Could not read Arc right now. Reload in a moment.</p></div>'; return; }
+  const me = account || DEMO_ME;
+  const rows = S.minelist.filter(({ r }) => (S.mtab === 'owed' ? r.seller : r.buyer).toLowerCase() === me);
+  if (!rows.length) { box.innerHTML = `<div class="card"><p>${S.mtab === 'owed' ? 'No requests yet. When you make one, it shows up here.' : 'You do not owe anything on Amana yet.'}</p><div class="btns">${S.mtab === 'owed' ? '<a class="btn g" href="#/new">New request</a>' : '<a class="btn g" href="#/open">I got a link</a>'}</div></div>`; return; }
+  const now = nowSec();
+  const info = rows.map(({ id, r }) => {
+    const state = STATES[Number(r.state)], late = state === 'PLEDGED' && now >= Number(r.dueAt);
+    const claimable = state === 'PLEDGED' && now >= Number(r.dueAt) + GRACE;
+    const act = late && S.mtab === 'owed' && claimable ? 'Claim' : late && S.mtab === 'owe' ? 'Pay' : 'Open';
+    return { id, r, chip: chipFor(state, late), act };
+  });
+  box.innerHTML = `<div class="list ph">${info.map((x) => `<a class="card rowcard" href="#/request/${x.id}"><div class="top2"><b>#${x.id}</b><span class="fig">${usd(x.r.amount)}</span>${x.chip}</div><div class="s">Due ${dateShort(x.r.dueAt)}${ngn(x.r.amount) ? ' · ' + ngn(x.r.amount) : ''}</div></a>`).join('')}</div>
+    <table class="dk"><tr><th>#</th><th>Amount</th><th>Due</th><th>Status</th><th></th></tr>${info.map((x) => `<tr><td>${x.id}</td><td class="fig">${usd(x.r.amount)}${ngn(x.r.amount) ? '<small>' + ngn(x.r.amount) + '</small>' : ''}</td><td>${dateShort(x.r.dueAt)}</td><td>${x.chip}</td><td><a href="#/request/${x.id}">${x.act}</a></td></tr>`).join('')}</table>`;
+}
+async function loadMine() {
+  if (DEMO) { S.minelist = [101, 102, 103, 104, 105, 106, 107].map((id) => ({ id, r: demoReq(id) })).reverse(); paintMine(); return; }
+  if (!account) { S.minelist = undefined; paintMine(); return; }
+  S.minelist = undefined; paintMine();
+  try {
+    const all = await allRequests();
+    S.minelist = all.filter(({ r }) => r.seller.toLowerCase() === account || r.buyer.toLowerCase() === account);
+    if (S.mtab === 'owed' && !S.minelist.some(({ r }) => r.seller.toLowerCase() === account) && S.minelist.length) S.mtab = 'owe';
+  } catch (e) { S.minelist = null; }
+  if (S.screen === 'mine') { const t = $('.tabs'); if (t) t.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.mtab === S.mtab)); paintMine(); }
+}
+
+const statsHtml = (a, b, c) => `<div class="stats"><div class="card"><b>${a}</b>Paid in full</div><div class="card"><b>${b}</b>Seller had to claim</div><div class="card"><b>${c}</b>Requests in total</div></div>`;
+function recordHtml() {
+  const w = DEMO ? DEMO_BUYER : (account || '');
+  return `${phHead('Buyer record', 'Any wallet')}<h1 class="t dk">Buyer record</h1>
+    <label class="f"><span>Wallet</span><input id="rwal" placeholder="0x... paste any wallet" autocomplete="off" spellcheck="false" value="${esc(w)}"></label>
+    <button class="btn lookupbtn" type="button" data-look>Look up</button>
+    <div id="recBody"></div>
+    <p class="s">Read from the chain, so nobody can edit it. Look up any buyer before you accept a request.</p>`;
+}
+async function lookupRecord() {
+  const out = $('#recBody'); if (!out) return;
+  const w = ($('#rwal').value || '').trim();
+  if (!ethers.isAddress(w)) { out.innerHTML = '<p class="s err">Paste a wallet address that starts with 0x.</p>'; return; }
+  if (DEMO) { out.innerHTML = statsHtml(6, 1, 7); return; }
+  out.innerHTML = '<div class="sk" style="height:84px"></div>';
+  try {
+    const k = countFor(await allRequests(), w);
+    out.innerHTML = statsHtml(k.paid, k.missed, k.total) + (k.total ? '' : '<p class="s" style="margin-top:8px">This wallet has no requests on Amana yet.</p>');
+  } catch (e) { out.innerHTML = '<p class="s err">Could not read Arc right now. Try again in a moment.</p>'; }
+}
+
+/* share screen, right after a request is made */
+function shareHtml(c) {
+  return `${phHead('Request ready', '#' + c.id)}<h1 class="t dk">Request ready <span class="chip">Created on Arc</span></h1>
+    <div class="share" style="display:flex;flex-direction:column;gap:12px">
+    <span class="chip ph" style="align-self:flex-start">Created on Arc</span>
+    <div class="t2" style="margin:0;font-size:22px">Send it to your customer</div>
+    <div class="card linkcard">${esc(shareLink(c.id))}</div>
+    <div class="btns" style="margin-top:2px"><button class="btn g" type="button" data-act="send">Send on WhatsApp</button><button class="btn o" type="button" data-act="copy">Copy link</button></div>
+    <p class="s">Then wait. The status shows under <a href="#/mine">My requests</a>. <a href="#/request/${c.id}">Open request #${c.id}</a></p>
+    </div>${msgEl}`;
+}
+
+/* request page: one page for both sides. The buttons depend on who is looking and what stage it is in. */
+function tlHtml(c) {
+  const { state, r, now } = c;
+  const finished = ['PAID', 'CLAIMED', 'RELEASED', 'RECLAIMED'].includes(state);
+  const final = { PAID: 'Paid', CLAIMED: 'Claimed', RELEASED: 'Released', RECLAIMED: 'Taken back', CANCELLED: 'Cancelled' }[state] || 'Paid or claimed';
+  const d = [true, state !== 'OPEN' && state !== 'CANCELLED', finished || now >= Number(r.dueAt), finished || state === 'CANCELLED'];
+  const names = ['Created', 'Pledged', 'Due ' + dateShort(r.dueAt), final];
+  return '<div class="tl dk" aria-label="Progress">' + names.map((n, i) => `<div class="${d[i] ? 'd' : ''}">${n}</div>`).join('') + '</div>';
 }
 function detailsHtml(c) {
   const r = c.r;
@@ -371,247 +912,163 @@ function detailsHtml(c) {
     <dt>Buyer can take it back</dt><dd>${dateTime(c.claimOpens + RECLAIM)}, 30 days after the claim opens</dd>
     <dt>Accepted savings</dt><dd>${c.accepted.map((i) => VAULTS[i].short + (VAULTS[i].live ? '' : ' (coming soon)')).join(', ')}</dd>
     <dt>Pledged savings</dt><dd>${r.shares > 0n ? shareTxt(c.vi, r.shares) + ' shares of ' + VAULTS[c.vi].name : 'None locked'}</dd>
-    ${N.rate && N.on ? `<dt>Naira rate</dt><dd>${rateNote()}</dd>` : ''}
+    ${N.rate && N.on ? `<dt>Naira rate</dt><dd class="rateNote">${rateNote()}</dd>` : ''}
     <dt>Contract</dt><dd>${CFG.amana} on Arc mainnet</dd>
-    <dt>Share link</dt><dd>${shareLink(c.id)}</dd>
-  </dl>
-  <p><b>What Amana cannot check:</b> it cannot tell whether goods arrived. It only enforces the pledge and the date. <a href="${CFG.readme}" target="_blank" rel="noopener" style="color:var(--accent)">Read the limits</a>.</p></details>`;
-}
-const shareLink = (id) => location.origin + location.pathname + '?id=' + id;
-
-/* ---------- screens ---------- */
-function homeHtml() {
-  if (S.tab === 'sell') {
-    const mine = S.mine.length ? `<p class="mylist">Your requests: ${S.mine.map((m) => `<button class="link" data-open="${m.id}" type="button">#${m.id} ${m.label}</button>`).join('')}</p>` : '';
-    return `
-      <div class="colA">
-      <h1>Sell now, get paid or protected later.</h1>
-      <p class="lead">Make a request for the amount owed and the date payment is due. The buyer backs their promise with yield savings they already hold in a vault.</p>
-      <div class="card">
-        <label for="amt">How much are you owed?${N.rate ? '<select id="unit" aria-label="Currency"><option value="USDC">USDC</option><option value="NGN">Naira</option></select>' : ' (in USDC)'}</label>
-        <input id="amt" inputmode="decimal" placeholder="200" value="200">
-        <div class="two">
-          <div><label for="due">Pay me by</label><input id="due" type="date"></div>
-          <div><label for="who">Buyer (optional)</label><input id="who" placeholder="0x..." autocomplete="off" spellcheck="false"></div>
-        </div>
-        <details style="margin-top:8px"><summary>Savings you accept: ${(S.accept || VAULTS.map((v, i) => i).filter((i) => VAULTS[i].live)).length} of ${VAULTS.filter((v) => v.live).length}</summary>
-          ${VAULTS.map((v, i) => `<label class="opt"><input type="checkbox" name="accept" value="${i}" ${(S.accept ? S.accept.includes(i) : v.live) ? 'checked' : ''} ${v.live ? '' : 'disabled'}><span>${v.name}${v.live ? '' : ' <span class="hint">Coming soon</span>'}</span></label>`).join('')}
-        </details>
-        <button class="big" id="create" type="button" style="margin-top:12px">Make request</button>
-        <p class="hint" id="helper"></p>
-      </div>
-      ${msgEl}
-      </div>
-      <div class="colB">
-      ${sideHtml()}
-      <div class="mobileonly" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
-        <button class="link" data-sheet="how" type="button">See how it works</button>
-        <button class="link" data-sheet="why" type="button">Why this exists</button>
-      </div>
-      <p class="hint" id="rateNote">${N.on ? rateNote() : ''}</p>
-      ${mine}
-      <div class="spacer"></div>
-      <form class="two" id="lookupS" style="grid-template-columns:1fr auto;align-items:end" onsubmit="return false">
-        <div><label for="numS" style="margin:0 0 3px">Already have one? Request number</label><input id="numS" inputmode="numeric" placeholder="1"></div>
-        <button class="ghost" id="openS" type="button" style="margin:0;width:auto;padding:10px 16px">Open</button>
-      </form>
-      </div>`;
-  }
-  return `
-    <div class="colA">
-    <h1>Use your savings as your promise to pay.</h1>
-    <p class="lead">Open the seller's request and pledge savings you already hold. Your shares keep earning, and they come back when you pay.</p>
-    <div class="card">
-      <label for="num">Request number from the seller</label>
-      <input id="num" inputmode="numeric" placeholder="1">
-      <button class="big" id="openReq" type="button" style="margin-top:12px">Open request</button>
-      <p class="hint">The seller may send you a link that opens the request directly.</p>
-    </div>
-    ${msgEl}
-    </div>
-    <div class="colB">
-    <div class="mobileonly" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
-      <button class="link" data-sheet="how" type="button">See how it works</button>
-      <button class="link" data-sheet="why" type="button">Why this exists</button>
-    </div>
-    ${sideHtml()}
-    </div>`;
-}
-
-/* On a wide screen the explanations sit beside the form instead of in pop-ups. */
-function sideHtml() {
-  const strip = (h) => h.replace(/<button class="big" data-sheet-close[^>]*>Got it<\/button>/, '');
-  const vaults = `<h3>Savings you can pledge</h3><ul class="vlist">${VAULTS.map((v) => `<li><b>${v.short}</b> ${v.live ? '<span class="ok">open</span>' : '<span class="hint">coming soon</span>'}</li>`).join('')}</ul>`;
-  return `<div class="desk side">${strip(sheetHtml('how'))}${vaults}</div><div class="desk side">${strip(sheetHtml('why'))}</div>`;
+    <dt>Share link</dt><dd>${esc(shareLink(c.id))}</dd>
+  </dl></details>`;
 }
 
 function requestHtml(c) {
+  if (c.err) return c.err;
   const { r, state, now, owed, role } = c;
-  const amt = usd(r.amount), pledgeWorth = c.neededWorth != null ? worthTxt(c.neededWorth) : '';
-  const late = state === 'PLEDGED' && now >= Number(r.dueAt);
-  const claimable = state === 'PLEDGED' && now >= c.claimOpens;
+  if (S.screen === 'share') return shareHtml(c);
   const isS = role === 'seller', isB = role === 'buyer';
-  let head, body, st = '', btns = '', sav = '', clock = '', statLine, cls = '';
+  const amt = usd(r.amount), amtN = num(r.amount, 0, 6);
+  const passed = now >= Number(r.dueAt);
+  const late = state === 'PLEDGED' && passed;
+  const claimable = state === 'PLEDGED' && now >= c.claimOpens;
+  const need = worth0(c.neededWorth);
   const dueS = dateShort(r.dueAt);
+  const buyerPledging = state === 'OPEN' && isB && !passed;
+  const sub = buyerPledging ? (S.sub === 'pledge' ? 'pledge' : 'review') : '';
   S.target = 0;
 
-  if (state === 'OPEN') {
-    cls = 'warn';
-    const passed = now >= Number(r.dueAt);
-    statLine = stats(amt, 'Not yet', dueS, ngn(r.amount));
-    if (passed) { head = 'The due date has passed.'; body = 'Nobody pledged before the date, so this request can no longer be pledged.'; }
-    else if (isS) { head = "Waiting for the buyer's pledge."; body = 'Send the request link to the buyer. Nothing is protected yet, and you can cancel before they pledge. The buyer must pledge at least 105% of the amount owed.'; }
-    else if (isB) { head = 'Pledge your savings to accept.'; body = `You owe ${amt}. To accept, pledge at least ${pledgeWorth} worth of savings you already hold in one of the vaults below.`; }
-    else if (role === 'other') { head = 'This request is for a different wallet.'; body = 'The seller named another buyer for this request, so only that wallet can pledge.'; }
-    else { head = "Waiting for the buyer's pledge."; body = `The buyer must pledge at least ${pledgeWorth} worth of savings in an accepted vault to cover ${amt}.`; }
-    const names = c.accepted.map((i) => VAULTS[i].short + (VAULTS[i].live ? '' : ' (coming soon)')).join(', ');
-    if (isB && !passed) {
-      const need = `<p>Needed: <b>${pledgeWorth}</b> worth${ngnAbout(c.neededWorth)}</p>`;
-      if (!c.holdings) sav = `<div class="savings"><h3>Your savings</h3>${need}<p>You have: not read yet</p></div>`;
-      else {
-        const rows = c.holdings.map((h) => {
-          const v = VAULTS[h.i];
-          const state = !h.live ? '<span class="hint">Coming soon</span>' : h.enough ? '<span class="ok">enough</span>' : '<span class="no">not enough</span>';
-          return `<label class="opt"><input type="radio" name="vault" value="${h.i}" ${h.i === c.choice ? 'checked' : ''} ${h.live ? '' : 'disabled'}><span><b>${v.short}</b>: you have ${worthTxt(h.haveWorth)} worth${ngnAbout(h.haveWorth)} ${state}</span></label>`;
-        }).join('');
-        const any = c.holdings.some((h) => h.live && h.enough);
-        sav = `<div class="savings"><h3>Your savings</h3>${need}${rows}${any ? '' : '<p class="no">You do not have enough yet.</p><p class="hint">First deposit USDC into one of these vaults, then come back.</p>'}</div>`;
-      }
-    } else if (role === 'visitor' && !passed) {
-      sav = `<div class="savings"><h3>Your savings</h3><p>Needed: <b>${pledgeWorth}</b> worth</p><p class="hint">Accepted vaults: ${names}. Connect your wallet to see whether you already have enough.</p></div>`;
+  /* ---- left side: what is owed ---- */
+  const open = state === 'OPEN' || state === 'PLEDGED';
+  const label = isB ? (open ? 'You owe' : 'You owed') : isS ? (open ? 'You are owed' : 'You were owed') : 'Owed';
+  const l1 = [ngn(r.amount) ? 'About ' + ngn(r.amount) : '', (state === 'PLEDGED' || state === 'OPEN') ? 'due ' + dueS : ''].filter(Boolean).join(' · ');
+  let owedBox = `<div class="s">${label}</div><div class="big fig">${amtN} <span class="s">USDC</span></div>${l1 ? `<div class="s">${l1.charAt(0).toUpperCase() + l1.slice(1)}</div>` : ''}`;
+  if (state === 'PLEDGED') {
+    const pct = Math.min(100, Number(r.paid * 100n / r.amount));
+    const left = Math.max(0, Math.ceil((Number(r.dueAt) - now) / 86400));
+    owedBox += `<div class="prog" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+      <div class="s">${num(r.paid, 0, 6)} paid · ${num(owed, 0, 6)} left${late ? ' · overdue' : ' · ' + left + ' day' + (left === 1 ? '' : 's')}</div>`;
+    if (!claimable) {
+      S.target = (!late && !isS) ? Number(r.dueAt) : c.claimOpens;
+      const lbl = isS ? 'You can claim in' : late ? 'The seller can claim in' : 'Due date in';
+      owedBox += `<div class="s clockrow">${lbl} <b class="clock" id="clock">${clockTxt(S.target - now)}</b></div>`;
     }
-    if (passed) btns = isS ? '<button class="big" data-act="cancel" type="button">Cancel this request</button>' : '<button class="big" data-home type="button">Back home</button>';
-    else if (isS) btns = '<button class="big" data-act="send" type="button">Send link</button><button class="ghost" data-act="cancel" type="button">Cancel this request</button>';
-    else if (isB) btns = '<button class="big" data-act="pledge" type="button">Pledge your savings</button>';
-    else if (role === 'other') btns = '<button class="big" data-home type="button">Back home</button>';
-    else btns = '<button class="big" data-act="connect" type="button">Connect wallet to pledge</button>';
+  } else if (state === 'CLAIMED') owedBox += `<div class="s">${num(r.paid, 0, 6)} paid · ${num(owed, 0, 6)} claimed by the seller</div>`;
+  let colA = `<div class="card owed">${owedBox}</div>`;
+  if (buyerPledging) colA += `<div class="card">You back it with <b>${need}</b> of savings (105%). Your savings keep earning while they are pledged.</div><div class="btns ph"><a class="btn" href="#/request/${c.id}/pledge">Continue</a></div>`;
+  if (r.buyer !== ethers.ZeroAddress) colA += '<p class="record" id="rec"></p>';
+
+  /* ---- right side: the actions ---- */
+  let h = '', body = '', extra = '', btns = '', tag = '';
+  if (state === 'OPEN') {
+    if (passed) { h = 'The due date has passed.'; body = 'Nobody pledged before the date, so this request can no longer be pledged.'; btns = isS ? '<button class="btn g" data-act="cancel" type="button">Cancel this request</button>' : backHome; }
+    else if (isS) {
+      tag = 'Seller view'; h = "Waiting for the buyer's pledge.";
+      body = `Send the request link to the buyer. Nothing is protected yet, and you can cancel before they pledge. The buyer must pledge at least ${need} of savings (105%).`;
+      btns = '<button class="btn g" data-act="send" type="button">Send on WhatsApp</button><button class="btn o" data-act="copy" type="button">Copy link</button><button class="btn o" data-act="cancel" type="button">Cancel this request</button>';
+    } else if (isB) {
+      tag = 'Pick savings';
+      const needRow = `<div class="need"><span class="s">You need to pledge at least</span><span class="fig"><b>${need}</b> worth${ngnAbout(c.neededWorth)}</span></div>`;
+      if (!c.holdings) extra = needRow + '<p class="s">We could not read your savings yet. Reload in a moment.</p>';
+      else {
+        const rows = c.holdings.map((x) => {
+          const v = VAULTS[x.i];
+          const st = !x.live ? '<small>Coming soon</small>' : x.enough ? '<small class="ok">Enough</small>' : '<small class="no">Not enough</small>';
+          return `<label class="opt"><input type="radio" name="vault" value="${x.i}" ${x.i === c.choice ? 'checked' : ''} ${x.live ? '' : 'disabled'}><span class="n">${v.label}</span><span class="r"><b class="fig">${worth0(x.haveWorth)}</b>${ngn(x.haveWorth) ? '<span class="fig">' + ngn(x.haveWorth) + '</span>' : ''}${st}</span></label>`;
+        }).join('');
+        const any = c.holdings.some((x) => x.live && x.enough);
+        extra = needRow + `<div class="tiles">${rows}</div>` + (any ? '' : '<p class="err" style="margin-top:10px;font-weight:600">You do not have enough yet.</p><p class="hint">First deposit USDC into one of these vaults, then come back.</p>');
+      }
+      body = '';
+      extra += '<div class="card k s" style="margin-top:12px">Nothing is sold. Your savings are locked, not cashed out.</div>';
+      btns = `<button class="btn g" data-act="pledge" type="button">Pledge ${need}</button>`;
+    } else if (role === 'other') { h = 'This request is for a different wallet.'; body = 'The seller named another buyer for this request, so only that wallet can pledge.'; btns = backHome; }
+    else {
+      tag = 'Buyer view'; h = "Waiting for the buyer's pledge.";
+      body = `The buyer must pledge at least ${need} of savings in an accepted vault (${c.accepted.map((i) => VAULTS[i].label).join(', ')}). Connect your wallet to see whether you already have enough.`;
+      btns = '<button class="btn g" data-act="connect" type="button">Connect wallet to pledge</button>';
+    }
   } else if (state === 'PLEDGED') {
-    const pw = c.worth != null ? worthTxt(c.worth) : '';
-    statLine = stats(usd(owed), pw ? num(c.worth, 0, 2) + ' USDC' : '...', dueS, ngn(owed), c.worth != null ? ngn(c.worth) : '');
-    cls = claimable ? 'bad' : '';
+    const pw = c.worth != null ? worth0(c.worth) : '';
     if (!late) {
-      S.target = isS ? c.claimOpens : Number(r.dueAt);
-      head = isS ? "The buyer's pledge is in place." : 'Your promise is backed by your savings.';
-      clock = `<p>${isS ? 'You can claim in' : 'You have time. Due date in'}</p><div class="clock" id="clock">${clockTxt(S.target - now)}</div>`;
-      body = isS ? `The buyer pledged ${pw} worth of savings. You cannot claim early. If they pay another way, release the pledge.`
-        : isB ? `Your ${pw} worth of shares is held by Amana and keeps earning. Pay ${usd(owed)} before the seller claims to get every share back.`
-        : `The buyer pledged ${pw} worth of savings. It is held by Amana and keeps earning for them.`;
+      h = isS ? "The buyer's pledge is in place." : 'Your promise is backed by your savings.';
+      body = isS ? `The buyer pledged ${pw} of savings. You cannot claim early. If they pay another way, release the pledge.`
+        : isB ? `Your ${pw} of savings is held by Amana and keeps earning. Pay ${usd(owed)} before the seller claims to get every share back.`
+        : `The buyer pledged ${pw} of savings. It is held by Amana and keeps earning for them.`;
     } else if (!claimable) {
-      S.target = c.claimOpens;
-      head = 'The due date has passed.';
-      clock = `<p>${isS ? 'You can claim in' : 'The seller can claim in'}</p><div class="clock" id="clock">${clockTxt(S.target - now)}</div>`;
+      h = 'The due date has passed.';
       body = isB ? 'You can still pay before the seller claims.' : 'The claim opens one hour after the due date.';
     } else {
-      head = isS ? 'The due date has passed.' : 'The request is overdue.';
-      body = isS ? 'You can now claim only what you are owed. The buyer gets the rest back in the same step.'
+      h = isS ? 'You can claim now.' : 'The request is overdue.';
+      body = isS ? 'It opens 1 hour after the date. You take only what you are owed. The rest goes back to the buyer in the same step.'
         : `You can still pay before the seller claims. If they claim first, they take shares worth ${usd(owed)} and you get the rest back.`;
     }
     if (isS) {
-      btns = claimable ? '<button class="big" data-act="claim" type="button">Claim what I am owed</button>'
-        : `<button class="big" type="button" disabled>Claim opens ${dateShort(c.claimOpens)}, 1 hour after the due date</button>`;
-      btns += '<button class="ghost" data-act="release" type="button">I was paid, release the pledge</button>';
+      tag = 'Seller view';
+      btns = claimable ? '<button class="btn g" data-act="claim" type="button">Claim savings</button>'
+        : `<button class="btn" type="button" disabled>Claim opens ${dateShort(c.claimOpens)}, 1 hour after the due date</button>`;
+      btns += '<button class="btn o" data-act="release" type="button">I was paid, release the pledge</button><button class="btn o" data-act="remind" type="button">Send reminder on WhatsApp</button>';
     } else if (isB) {
-      btns = `<button class="big" data-act="pay" type="button">${late ? 'Pay now' : 'Pay ' + usd(owed)}</button>`;
-      if (now >= c.claimOpens + RECLAIM) btns = '<button class="big" data-act="reclaim" type="button">Take my pledge back</button>' + `<button class="ghost" data-act="pay" type="button">Pay ${usd(owed)} instead</button>`;
-    } else if (role === 'other') btns = '<button class="big" data-home type="button">Back home</button>';
-    else btns = '<button class="big" data-act="connect" type="button">Connect wallet</button>';
-    if (role === 'visitor') body += ' Connect the seller\'s or buyer\'s wallet to act on this request.';
-    if (r.paid > 0n) body += ` ${usd(r.paid)} of ${amt} is already paid.`;
-    if (isB) {
-      sav = `<div class="savings"><h3>How much do you want to pay now?</h3>
-        <div class="row"><div><input id="payAmt" inputmode="decimal" aria-label="Amount in USDC" value="${ethers.formatUnits(owed, 6).replace(/\.0$/, '')}"></div><button class="ghost" id="halfBtn" type="button" style="margin:0">Half</button></div>
-        <p class="hint" id="payHint">You can pay all of it, or part now and the rest later. Your pledge comes back once it is all paid.</p></div>`;
-      btns = btns.replace(/<button class="big" data-act="pay" type="button">[^<]*<\/button>/, '<button class="big" data-act="pay" id="payBtn" type="button">' + (late ? 'Pay now' : 'Pay ' + usd(owed)) + '</button>');
-    }
-    if (isS && !claimable) btns += '<button class="ghost" data-act="remind" type="button">Remind the buyer on WhatsApp</button>';
+      tag = 'Buyer view';
+      extra = `<label class="f" style="margin-top:12px"><span>Pay</span><input id="payAmt" class="fig" inputmode="decimal" aria-label="Amount in USDC" value="${ethers.formatUnits(owed, 6).replace(/\.0$/, '')}"></label>
+        <p class="hint" id="payHint">You can pay all of it, or part now and the rest later. Your pledge comes back once it is all paid.</p>`;
+      btns = `<button class="btn g" data-act="pay" id="payBtn" type="button">Pay now</button><button class="btn o" id="halfBtn" type="button">Pay half</button>`;
+      if (now >= c.claimOpens + RECLAIM) btns = '<button class="btn g" data-act="reclaim" type="button">Take my pledge back</button><button class="btn o" data-act="pay" type="button">Pay ' + usd(owed) + ' instead</button>';
+    } else if (role === 'other') btns = backHome;
+    else { tag = 'Visitor'; body += " Connect the seller's or buyer's wallet to act on this request."; btns = '<button class="btn g" data-act="connect" type="button">Connect wallet</button>'; }
   } else {
     const T = {
-      PAID: ['Paid in full.', '', `The seller received ${usd(r.amount)}. The buyer got every pledged share back, including any yield earned while pledged.`, ['0 USDC', 'Returned', dueS]],
-      CLAIMED: ['Seller claimed what was owed.', 'bad', `The seller received shares worth ${usd(r.amount - r.paid)}. The remaining shares went back to the buyer in the same step. The seller can cash out the claimed shares in the vault they came from.`, [usd(r.amount - r.paid), 'Claimed', dueS]],
-      RELEASED: ['Pledge released.', '', 'The seller released the request, so all pledged shares went back to the buyer.', ['Settled', 'Returned', dueS]],
-      RECLAIMED: ['The buyer took the pledge back.', 'warn', 'The seller did nothing for 30 days after the claim opened, so the buyer took all the pledged shares back.', ['Settled', 'Returned', dueS]],
-      CANCELLED: ['Request cancelled.', 'warn', 'The seller cancelled before anyone pledged. Nothing was locked.', ['Cancelled', 'None', dueS]]
+      PAID: ['Paid in full', `Seller received <b>${usd(r.amount)}</b>.<br>Buyer got every pledged share back, plus what it earned.`],
+      CLAIMED: ['Seller claimed what was owed.', `The seller received shares worth <b>${usd(r.amount - r.paid)}</b>. The remaining shares went back to the buyer in the same step.`],
+      RELEASED: ['Pledge released.', 'The seller released the request, so all pledged shares went back to the buyer.'],
+      RECLAIMED: ['The buyer took the pledge back.', 'The seller did nothing for 30 days after the claim opened, so the buyer took all the pledged shares back.'],
+      CANCELLED: ['Request cancelled.', 'The seller cancelled before anyone pledged. Nothing was locked.']
     }[state];
-    [head, cls, body] = T; statLine = stats(...T[3]);
-    btns = '<button class="big" data-home type="button">Back home</button>';
-    if (isS && state === 'CLAIMED' && c.cashShares > 0n) btns = `<button class="big" data-act="cashout" type="button">Cash out about ${worthTxt(c.cashWorth)} to USDC${ngnAbout(c.cashWorth)}</button>` + btns.replace('class="big"', 'class="ghost"');
-    if (isS && c.credit > 0n) btns += `<button class="ghost" data-act="withdraw" type="button">Collect ${usd(c.credit)} held for me</button>`;
+    h = T[0]; body = T[1];
+    if (state === 'PAID') btns = `<a class="btn o" href="${CFG.explorer}/address/${CFG.amana}" target="_blank" rel="noopener">View on explorer</a>`;
+    else btns = backHome;
+    if (isS && state === 'CLAIMED' && c.cashShares > 0n) {
+      extra = `<div class="t2" style="margin-top:14px">Turn it into USDC</div><p class="s">Amana checks the vault has the cash first.</p><div class="card k" style="margin-top:10px"><b class="fig">≈ ${worth0(c.cashWorth)}</b>${ngn(c.cashWorth) ? ' · about ' + ngn(c.cashWorth) : ''}</div>`;
+      btns = '<button class="btn g" data-act="cashout" type="button">Cash out</button>' + btns.replace('class="btn"', 'class="btn o"');
+    }
   }
-  if (isS && c.credit > 0n && state !== 'PAID' && !btns.includes('withdraw')) btns += `<button class="ghost" data-act="withdraw" type="button">Collect ${usd(c.credit)} held for me</button>`;
+  if (isS && c.credit > 0n) btns += `<button class="btn o" data-act="withdraw" type="button">Collect ${usd(c.credit)} held for me</button>`;
 
-  return `<div class="colA"><button class="back" data-home type="button">&larr; Back home</button>
-    ${track(state)}
-    <div class="status ${cls}"><h2>${head}</h2>${clock}<p>${body}</p></div>
-    ${statLine}</div>
-    <div class="colB">
-    ${r.buyer !== ethers.ZeroAddress ? '<p class="record" id="rec"></p>' : ''}
-    ${sav}
-    <div class="spacer"></div>
-    ${msgEl}
-    ${btns}
-    ${detailsHtml(c)}</div>`;
+  const colB = `<div class="card acts">${tag ? `<div class="s${tag === 'Pick savings' ? ' dk' : ''}">${tag}</div>` : ''}${h ? `<div class="t2" style="${tag ? 'margin-top:4px' : ''}">${h}</div>` : ''}${body ? `<p>${body}</p>` : ''}${extra}<div class="btns">${btns}</div></div>`;
+
+  const headDk = `<h1 class="t dk">Request #${c.id} ${chipFor(state, late)}</h1>`;
+  const headPh = sub === 'pledge' ? phHead('Pick savings', 'You hold') : sub === 'review' ? phHead(`Request #${c.id}`, `from ${shortAddr(r.seller)}`) : phHead(`Request #${c.id}`, chipFor(state, late));
+  return `<div class="rq" data-sub="${sub}" style="display:flex;flex-direction:column;gap:12px">${headPh}${headDk}${tlHtml(c)}
+    <div class="two"><div class="colA">${colA}</div><div class="colB">${colB}</div></div>
+    ${msgEl}${detailsHtml(c)}</div>`;
 }
 
-function sheetHtml(kind) {
-  if (kind === 'why') return `<h2>Why this exists</h2>
-    <p>I have a shop. Some of my customers keep their money in Aave or Morpho, earning yield, and they don't want to unlock it just to buy something from me. But I can't trust that they will bring the money later on their own.</p>
-    <p>So the customer pledges 105% of what they owe me, using the savings they already have in Aave or Morpho. They don't cash anything out, so the money keeps earning. We lock it until a due date, and the customer picks the date or we choose it together.</p>
-    <p>If they pay before that date, they get everything back, and they kept earning the whole time. If they don't, I can claim only what I am owed, and the rest goes straight back to them.</p>
-    <button class="big" data-sheet-close type="button" style="margin-top:12px">Got it</button>`;
-  return `<h2>How it works, with 200 USDC due in 30 days</h2>
-    <ol>
-      <li>You make a request for 200 USDC due in 30 days and send the buyer the link.</li>
-      <li>The buyer pledges 210 USDC worth of vault shares, for example from Aave or Morpho. Those shares keep earning interest for them.</li>
-      <li>If the buyer pays, you get 200 USDC and they get every share back.</li>
-      <li>If the buyer does not pay, you can claim one hour after the due date. You take only the shares worth 200 USDC, and the rest goes back to the buyer in the same step.</li>
-    </ol>
-    <p>A smart contract holds the pledge. It has no owner, no fees, and nobody can change its rules. If you do not claim, the buyer can take the pledge back 30 days after your claim opens.</p>
-    <h3>What Amana cannot check</h3>
-    <p>It cannot tell whether goods arrived. It only enforces the pledge and the date.</p>
-    <h3>Limits, honestly</h3>
-    <p>A vault can halt or run short of cash, so cashing out claimed shares may have to wait. The seller is paid in vault shares, which they cash out. Use small amounts. Details are in the <a href="${CFG.readme}" target="_blank" rel="noopener">README</a>.</p>
-    <button class="big" data-sheet-close type="button" style="margin-top:12px">Got it</button>`;
-}
-
-/* ---------- render ---------- */
-function render() {
-  const home = S.screen === 'home';
-  main.innerHTML = home ? homeHtml() : (S.cur && S.cur.html) || '';
-  document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('on', home && b.dataset.tab === S.tab));
-  if (home && S.tab === 'sell') {
-    const t = new Date(Date.now() + 30 * 86400000); const due = $('#due');
-    due.value = S.dueVal || (t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0'));
-    due.min = new Date().toISOString().slice(0, 10);
-    updateHelper();
+/* ---------- demo data: made-up requests so every screen can be seen without a wallet ---------- */
+function demoReq(id) {
+  const now = nowSec(), U = 1000000n, Z = ethers.ZeroAddress;
+  const seller = DEMO_AS === 'seller' ? DEMO_ME : DEMO_SELLER;
+  const buyerMe = DEMO_AS === 'buyer' ? DEMO_ME : DEMO_BUYER;
+  const mk = (state, amount, paid, dueIn, shares, buyer) => ({ seller, buyer, state: BigInt(state), dueAt: BigInt(now + dueIn), acceptMask: 7n, vaultIdx: 1n, amount: BigInt(amount) * U, paid: BigInt(paid) * U, shares: BigInt(shares) * U, termsHash: '0x' + '00'.repeat(32) });
+  switch (id) {
+    case 101: return mk(1, 200, 0, 30 * 86400, 0, Z);
+    case 102: return mk(2, 200, 120, 9 * 86400, 210, buyerMe);
+    case 103: return mk(2, 120, 0, -600, 126, buyerMe);
+    case 104: return mk(2, 120, 0, -3 * 86400, 126, buyerMe);
+    case 105: return mk(3, 50, 50, -20 * 86400, 0, buyerMe);
+    case 106: return mk(4, 200, 120, -5 * 86400, 0, buyerMe);
+    case 107: return mk(7, 75, 0, 12 * 86400, 0, Z);
+    default: return mk(0, 0, 0, 0, 0, Z);
   }
-  if (window.matchMedia('(min-width:900px)').matches) main.querySelectorAll('details').forEach((d) => { d.open = true; });
-  paintMsg();
-  main.scrollTop = 0;
 }
-function updateHelper() {
-  const h = $('#helper'); if (!h) return;
-  let v = ($('#amt').value || '').trim().replace(/,/g, '');
-  const inNgn = $('#unit') && $('#unit').value === 'NGN' && N.rate;
-  let n = /^\d+(\.\d{1,6})?$/.test(v) ? Number(v) : null;
-  if (n !== null && inNgn) { n = Math.round(n / N.rate * 100) / 100; v = String(n); }
-  const fmt = (x) => x.toLocaleString(undefined, { maximumFractionDigits: 2 });
-  h.textContent = n === null ? 'The buyer must pledge at least 105% of the amount owed, in vault savings.'
-    : `${inNgn ? 'That is about ' + v + ' USDC at today\'s rate, and it is fixed in USDC once you make the request. ' : ''}For ${v} USDC due, the buyer must pledge at least ${fmt(Math.ceil(n * 105) / 100)} USDC worth${N.rate && N.on ? ' (about ₦' + Math.round(Math.ceil(n * 105) / 100 * N.rate).toLocaleString('en-NG') + ')' : ''} of vault savings.`;
-}
-function goHome(tab) {
-  if (tab) S.tab = tab;
-  S.screen = 'home'; S.cur = null; S.msg = null; S.target = 0;
-  history.replaceState(null, '', location.pathname);
-  render(); loadMine();
+function demoExtras(c) {
+  const ex = {};
+  if (c.r.shares > 0n) ex.worth = c.r.shares;
+  if (c.role === 'buyer' && c.state === 'OPEN') {
+    const have = [35, 412, 0];
+    ex.holdings = c.accepted.map((i) => { const hw = BigInt(have[i] || 0) * 1000000n; return { i, have: hw, haveWorth: hw, need: c.neededWorth, enough: hw >= c.neededWorth, live: VAULTS[i].live }; });
+    ex.choice = 1;
+  }
+  if (c.role === 'seller' && c.state === 'CLAIMED') { ex.cashShares = 80000000n; ex.cashWorth = 80000000n; }
+  return ex;
 }
 
-async function loadRequest(id, keepMsg) {
-  if (!keepMsg) S.msg = null;
-  S.screen = 'request';
-  let r;
-  try { r = await retry(() => hfR.getRequest(id)); }
-  catch (e) { S.cur = { id, html: '<button class="back" data-home type="button">&larr; Back home</button><div class="status bad"><h2>Could not read Arc right now.</h2><p>Reload in a moment.</p></div>' }; render(); return; }
-  if (Number(r.state) === 0) { S.cur = { id, html: `<button class="back" data-home type="button">&larr; Back home</button><div class="status bad"><h2>No such request.</h2><p>There is no request number ${id}. Check the number with the seller.</p></div>` }; render(); return; }
+/* ---------- loading a request ---------- */
+function makeC(id, r) {
   const state = STATES[Number(r.state)], now = nowSec();
   const claimOpens = Number(r.dueAt) + GRACE, owed = r.amount - r.paid;
   const isSeller = !!account && r.seller.toLowerCase() === account;
@@ -619,45 +1076,50 @@ async function loadRequest(id, keepMsg) {
   const role = isSeller ? 'seller' : isBuyer ? 'buyer' : (account ? 'other' : 'visitor');
   const vi = Number(r.vaultIdx);
   const accepted = VAULTS.map((v, i) => i).filter((i) => inMask(r.acceptMask, i));
-  const c = { id, r, state, now, claimOpens, owed, role, credit: 0n, worth: null, neededWorth: (r.amount * 105n + 99n) / 100n, holdings: null, accepted, vi };
-  try {
-    if (r.shares > 0n) c.worth = await retry(() => vaultRs[vi].convertToAssets(r.shares));
-    if (isBuyer && state === 'OPEN') {
-      c.holdings = await Promise.all(accepted.map(async (i) => {
-        const have = await retry(() => vaultRs[i].balanceOf(account));
-        const haveWorth = have > 0n ? await retry(() => vaultRs[i].convertToAssets(have)) : 0n;
-        const need = await retry(() => hfR.sharesNeededFor(r.amount, i));
-        return { i, have, haveWorth, need, enough: have >= need, live: VAULTS[i].live };
-      }));
-      const pick = c.holdings.find((h) => h.live && h.enough) || c.holdings.find((h) => h.live) || c.holdings[0];
-      c.choice = pick ? pick.i : null;
-    }
-    if (isSeller) c.credit = await retry(() => hfR.credited(account));
-    if (isSeller && state === 'CLAIMED') {
-      let claimed = null;
-      try { const ev = await retry(() => hfR.queryFilter(hfR.filters.Claimed(id), CFG.deployBlock)); if (ev.length) claimed = ev[ev.length - 1].args.sharesToSeller; } catch {}
-      const have = await retry(() => vaultRs[vi].balanceOf(account));
-      const sh = claimed == null ? have : (claimed < have ? claimed : have);
-      c.cashShares = sh; c.cashWorth = sh > 0n ? await retry(() => vaultRs[vi].convertToAssets(sh)) : 0n;
-    }
-  } catch (e) { /* show what we have; actions re-check on click */ }
-  c.html = requestHtml(c);
-  S.cur = c;
-  history.replaceState(null, '', '?id=' + id);
-  render();
-  S.all = null; fillRecord(c);
+  return { id, r, state, now, claimOpens, owed, role, credit: 0n, worth: null, neededWorth: (r.amount * 105n + 99n) / 100n, holdings: null, accepted, vi, at: Date.now() };
 }
+const errBox = (t, p) => `<div class="card" style="border-color:var(--bad-line);background:var(--bad-tint)"><div class="t2">${t}</div><p>${p}</p></div><div class="btns">${backHome}</div>`;
+const stillHere = (id) => String(S.reqId) === String(id) && (S.screen === 'request' || S.screen === 'share');
 
-async function loadMine() {
-  if (!account) return;
-  try {
-    const n = Number(await retry(() => hfR.requestCount()));
-    const ids = []; for (let i = n; i >= 1 && ids.length < 12; i--) ids.push(i);
-    const rs = await Promise.all(ids.map((i) => retry(() => hfR.getRequest(i)).then((r) => [i, r])));
-    S.mine = rs.filter(([, r]) => r.seller.toLowerCase() === account || r.buyer.toLowerCase() === account)
-      .slice(0, 5).map(([i, r]) => ({ id: i, label: (r.seller.toLowerCase() === account ? 'selling' : 'buying') + ', ' + STATES[Number(r.state)].toLowerCase() }));
-    if (S.screen === 'home' && S.tab === 'sell') { const keepA = $('#amt') && $('#amt').value, keepD = $('#due') && $('#due').value, keepW = $('#who') && $('#who').value; render(); if (keepA) $('#amt').value = keepA; if (keepD) $('#due').value = keepD; if (keepW) $('#who').value = keepW; updateHelper(); }
-  } catch (e) { /* the list is optional */ }
+async function loadRequest(id, keepMsg) {
+  id = String(id);
+  S.reqId = id;
+  if (!keepMsg) { S.msg = null; main.innerHTML = skeletonHtml(); }
+  let r;
+  try { r = DEMO ? demoReq(Number(id)) : await retry(() => hfR.getRequest(id)); }
+  catch (e) { if (!stillHere(id)) return; S.cur = { id, err: errBox('Could not read Arc right now.', 'Reload in a moment.'), at: Date.now() }; render(); return; }
+  if (!stillHere(id)) return;
+  if (Number(r.state) === 0) { S.cur = { id, err: errBox('No such request.', `There is no request number ${esc(id)}. Check the number with the seller.`), at: Date.now() }; render(); return; }
+  const c = makeC(id, r);
+  if (DEMO) Object.assign(c, demoExtras(c));
+  else {
+    try {
+      if (r.shares > 0n) c.worth = await retry(() => vaultRs[c.vi].convertToAssets(r.shares));
+      if (c.role === 'buyer' && c.state === 'OPEN') {
+        c.holdings = await Promise.all(c.accepted.map(async (i) => {
+          const have = await retry(() => vaultRs[i].balanceOf(account));
+          const haveWorth = have > 0n ? await retry(() => vaultRs[i].convertToAssets(have)) : 0n;
+          const need = await retry(() => hfR.sharesNeededFor(r.amount, i));
+          return { i, have, haveWorth, need, enough: have >= need, live: VAULTS[i].live };
+        }));
+        const pick = c.holdings.find((h) => h.live && h.enough) || c.holdings.find((h) => h.live) || c.holdings[0];
+        c.choice = pick ? pick.i : null;
+      }
+      if (c.role === 'seller') c.credit = await retry(() => hfR.credited(account));
+      if (c.role === 'seller' && c.state === 'CLAIMED') {
+        let claimed = null;
+        claimed = await claimedShares(id);
+        const have = await retry(() => vaultRs[c.vi].balanceOf(account));
+        const sh = claimed == null ? have : (claimed < have ? claimed : have);
+        c.cashShares = sh; c.cashWorth = sh > 0n ? await retry(() => vaultRs[c.vi].convertToAssets(sh)) : 0n;
+      }
+    } catch (e) { /* show what we have; actions re-check on click */ }
+  }
+  if (!stillHere(id)) return;
+  c.at = Date.now();
+  S.cur = c;
+  render();
+  fillRecord(c);
 }
 
 /* ---------- actions ---------- */
@@ -665,16 +1127,17 @@ async function createReq() {
   setMsg('');
   let amt = $('#amt').value.trim().replace(/,/g, ''); const due = $('#due').value, buyer = $('#who').value.trim();
   if ($('#unit') && $('#unit').value === 'NGN' && N.rate && /^\d+(\.\d{1,2})?$/.test(amt)) amt = (Math.round(Number(amt) / N.rate * 100) / 100).toFixed(2);
-  if (!/^\d+(\.\d{1,6})?$/.test(amt) || Number(amt) < 1) return setMsg('Enter an amount of at least 1 USDC.', true);
-  if (!due) return setMsg('Pick the date you want to be paid by.', true);
-  if (buyer && !ethers.isAddress(buyer)) return setMsg('That buyer address is not valid.', true);
+  if (!/^\d+(\.\d{1,6})?$/.test(amt) || Number(amt) < 1) { toStep(1); return setMsg('Enter an amount of at least 1 USDC.', true); }
+  if (!due) { toStep(1); return setMsg('Pick the date you want to be paid by.', true); }
+  if (buyer && !ethers.isAddress(buyer)) { toStep(1); return setMsg('That buyer address is not valid.', true); }
   const dueAt = Math.floor(new Date(due + 'T23:59:00').getTime() / 1000);
-  if (dueAt <= nowSec()) return setMsg('Pick a date in the future.', true);
-  if (dueAt > nowSec() + MAX_TERM - 3600) return setMsg('The date can be at most one year away.', true);
+  if (dueAt <= nowSec()) { toStep(1); return setMsg('Pick a date in the future.', true); }
+  if (dueAt > nowSec() + MAX_TERM - 3600) { toStep(1); return setMsg('The date can be at most one year away.', true); }
   let mask = 0;
   document.querySelectorAll('input[name="accept"]:checked').forEach((el) => { mask |= 1 << Number(el.value); });
   mask &= LIVE_MASK;
   if (!mask) return setMsg('Pick at least one kind of savings you accept.', true);
+  if (DEMO) { toast('Demo screens only. Nothing is sent.'); return; }
   if (!(await connect())) return;
   try {
     setMsg('Confirm in your wallet...');
@@ -685,20 +1148,23 @@ async function createReq() {
     let id;
     for (const l of rc.logs) { try { const p = hf.interface.parseLog(l); if (p && p.name === 'RequestCreated') id = p.args.id; } catch {} }
     if (id === undefined) id = await hf.requestCount();
-    location.href = '?id=' + id.toString();
+    S.cur = null; S.all = null; S.minelist = undefined; S.accept = null;
+    location.hash = '#/share/' + id.toString();
   } catch (e) { setMsg('Failed: ' + friendly(e), true); }
 }
+function toStep(n) { if (S.step !== n) { if (n === 1) { history.length > 1 && location.hash.endsWith('/2') ? history.back() : (location.hash = '#/new'); } else location.hash = '#/new/2'; } }
 
 const hfW = () => new ethers.Contract(CFG.amana, HF_ABI, signer);
 async function act(name) {
   const c = S.cur; if (!c) return;
+  if (name === 'copy') { try { await navigator.clipboard.writeText(shareLink(c.id)); toast('Link copied.'); } catch { toast('Copy this link: ' + shareLink(c.id)); } return; }
   if (name === 'send' || name === 'remind') {
     const link = shareLink(c.id), how = `${usd(c.r.amount)}${ngnAbout(c.r.amount)}`, due = dateTxt(c.r.dueAt);
     const text = name === 'send'
       ? `Hello, I am asking for ${how} by ${due}. You can back your promise with the vault savings you already have, so you do not have to cash anything out and it keeps earning. Open the request here: ${link}`
       : `Hello, a reminder that ${usd(c.owed)}${ngnAbout(c.owed)} is due on ${due}. You can pay it here, and your pledged savings come back to you: ${link}`;
     try { await navigator.clipboard.writeText(link); toast('Link copied.'); } catch {}
-    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
+    if (!DEMO) window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank', 'noopener');
     return;
   }
   if (name === 'connect') { if (await connect()) loadRequest(c.id); return; }
@@ -748,63 +1214,147 @@ async function act(name) {
 function openNumber(v) {
   v = (v || '').trim();
   if (!/^\d+$/.test(v) || v === '0') { setMsg('Enter a request number, like 1.', true); return; }
-  loadRequest(v);
+  location.hash = '#/request/' + v;
 }
+
+/* the form on New request: amount helper, naira line, live preview */
+function updateHelper() {
+  if (!$('#amt')) return;
+  let v = ($('#amt').value || '').trim().replace(/,/g, '');
+  const inNgn = $('#unit') && $('#unit').value === 'NGN' && N.rate;
+  let n = /^\d+(\.\d{1,6})?$/.test(v) ? Number(v) : null;
+  if (n !== null && inNgn) { n = Math.round(n / N.rate * 100) / 100; v = String(n); }
+  const fmt = (x) => x.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  const nl = $('#ngnLine'); if (nl) nl.textContent = n === null || !N.rate || !N.on ? '' : inNgn ? 'About ' + fmt(n) + ' USDC' : 'About ₦' + Math.round(n * N.rate).toLocaleString('en-NG') + ' today';
+  const need = n === null ? null : Math.ceil(n * 105) / 100;
+  const ht = n === null ? 'The buyer must pledge at least 105% of the amount owed, in vault savings.'
+    : `${inNgn ? 'That is about ' + v + ' USDC at today\'s rate, and it is fixed in USDC once you make the request. ' : ''}For ${v} USDC due, the buyer must pledge at least ${fmt(need)} USDC worth${N.rate && N.on ? ' (about ₦' + Math.round(need * N.rate).toLocaleString('en-NG') + ')' : ''} of vault savings.`;
+  document.querySelectorAll('.helper').forEach((h) => { h.textContent = ht; });
+  const pa = $('#pvAmt'); if (pa) pa.textContent = n === null ? '0' : fmt(n);
+  const dv = $('#due') && $('#due').value; let ds = '';
+  if (dv) { const d = new Date(dv + 'T12:00:00'); if (!isNaN(d)) ds = 'due ' + d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
+  const pn = $('#pvNgn'); if (pn) pn.textContent = [n !== null && N.rate && N.on ? 'About ₦' + Math.round(n * N.rate).toLocaleString('en-NG') : '', ds].filter(Boolean).join(' · ').replace(/^./, (x) => x.toUpperCase());
+  const pt = $('#pvTerms'); if (pt) pt.innerHTML = need === null ? 'They put up at least 105% of the amount in savings.' : `They put up <b>${fmt(need)} USDC</b> of savings (105%). It keeps earning.`;
+}
+
+/* ---------- render and router ---------- */
+function viewHtml() {
+  switch (S.screen) {
+    case 'new': return newHtml(S.step);
+    case 'open': return openHtml();
+    case 'mine': return mineHtml();
+    case 'record': return recordHtml();
+    case 'about': return aboutHtml();
+    case 'request': case 'share': return S.cur && String(S.cur.id) === String(S.reqId) ? requestHtml(S.cur) : skeletonHtml();
+    default: return homeHtml();
+  }
+}
+function render() {
+  main.innerHTML = viewHtml();
+  main.style.animation = 'none'; void main.offsetWidth; main.style.animation = '';
+  if (S.screen === 'new') {
+    const due = $('#due');
+    if (due) { const t = new Date(Date.now() + 30 * 86400000); due.value = S.dueVal || (t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0')); due.min = new Date().toISOString().slice(0, 10); }
+    updateHelper();
+  }
+  if (S.screen === 'mine') paintMine();
+  paintMsg();
+}
+function paintNav() {
+  const key = { home: 'home', open: 'home', new: 'new', mine: 'mine', request: 'mine', share: 'mine', record: 'record', about: 'about' }[S.screen] || 'home';
+  document.querySelectorAll('[data-nav]').forEach((a) => { a.classList.toggle('on', a.dataset.nav === key); if (a.dataset.nav === key) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+}
+const SCREENS = ['home', 'new', 'open', 'mine', 'record', 'about', 'request', 'share'];
+function route() {
+  const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
+  let name = parts[0] || 'home';
+  if (!SCREENS.includes(name)) name = 'home';
+  if ((name === 'request' || name === 'share') && !/^[1-9]\d*$/.test(parts[1] || '')) name = 'home';
+  const sameNew = name === 'new' && S.screen === 'new' && $('#newForm');
+  S.screen = name; S.step = (name === 'new' && parts[1] === '2') ? 2 : 1; S.sub = parts[2] || '';
+  paintNav();
+  if (sameNew) { $('#newForm').dataset.step = S.step; window.scrollTo(0, 0); return; }
+  S.msg = null; S.target = 0;
+  if (name === 'request' || name === 'share') {
+    S.reqId = parts[1];
+    if (S.cur && String(S.cur.id) === parts[1] && Date.now() - S.cur.at < 30000) render(); else loadRequest(parts[1]);
+  } else {
+    render();
+    if (name === 'mine') loadMine();
+    if (name === 'home') loadActivity();
+    if (name === 'record' && !DEMO && account && $('#rwal') && $('#rwal').value) lookupRecord();
+    if (name === 'record' && DEMO) lookupRecord();
+  }
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', route);
 
 document.addEventListener('click', (e) => {
   const t = e.target.closest('button'); if (!t) return;
   if (t.id === 'ngnBtn') { N.on = !N.on; try { localStorage.setItem('amana_ngn', N.on ? 'on' : 'off'); } catch {} paintNgnBtn(); repaint(); return; }
-  if (t.id === 'halfBtn') { const el = $('#payAmt'); if (el && S.cur) { el.value = (Number(S.cur.owed / 2n) / 1e6).toFixed(6).replace(/\.?0+$/, ''); el.dispatchEvent(new Event('input', { bubbles: true })); } return; }
-  if (t.id === 'wallet') { connect().then((ok) => { if (ok) { if (S.cur) loadRequest(S.cur.id, true); else loadMine(); } }); return; }
-  if (t.dataset.tab) { goHome(t.dataset.tab); return; }
-  if (t.hasAttribute('data-home')) { goHome(); return; }
-  if (t.dataset.sheet) { $('#sheet').innerHTML = sheetHtml(t.dataset.sheet); $('#sheetBg').hidden = false; return; }
-  if (t.hasAttribute('data-sheet-close')) { $('#sheetBg').hidden = true; return; }
-  if (t.dataset.open) { loadRequest(t.dataset.open); return; }
+  if (t.id === 'halfBtn') {
+    const el = $('#payAmt');
+    if (el && S.cur) { el.value = (Number(S.cur.owed / 2n) / 1e6).toFixed(6).replace(/\.?0+$/, ''); el.dispatchEvent(new Event('input', { bubbles: true })); act('pay'); }
+    return;
+  }
+  if (t.id === 'wallet') { connect().then((ok) => { if (ok) { S.all = null; if (S.cur && (S.screen === 'request' || S.screen === 'share')) loadRequest(S.cur.id, true); else if (S.screen === 'mine') loadMine(); else if (S.screen === 'record') { const w = $('#rwal'); if (w && !w.value) w.value = account; } } }); return; }
+  if (t.dataset.mtab) { S.mtab = t.dataset.mtab; paintMine(); return; }
+  if (t.hasAttribute('data-next')) {
+    const amt = ($('#amt').value || '').trim().replace(/,/g, '');
+    if (!/^\d+(\.\d{1,6})?$/.test(amt) || Number(amt) <= 0) { setMsg('Enter how much you are owed.', true); return; }
+    if (!$('#due').value) { setMsg('Pick the date you want to be paid by.', true); return; }
+    setMsg(''); location.hash = '#/new/2'; return;
+  }
+  if (t.hasAttribute('data-create')) { createReq(); return; }
+  if (t.hasAttribute('data-openreq')) { openNumber($('#num').value); return; }
+  if (t.hasAttribute('data-look')) { lookupRecord(); return; }
   if (t.dataset.act) { act(t.dataset.act); return; }
-  if (t.id === 'create') { createReq(); return; }
-  if (t.id === 'openReq') { openNumber($('#num').value); return; }
-  if (t.id === 'openS') { openNumber($('#numS').value); return; }
 });
 document.addEventListener('input', (e) => {
   if (e.target.id === 'amt') updateHelper();
   if (e.target.id === 'payAmt' && S.cur) {
     const raw = e.target.value.trim(), ok = /^\d+(\.\d{1,6})?$/.test(raw) && Number(raw) > 0;
     const amt = ok ? ethers.parseUnits(raw, 6) : 0n, shown = amt > S.cur.owed ? S.cur.owed : amt;
-    const b = $('#payBtn'); if (b && ok) b.textContent = (S.cur.now >= Number(S.cur.r.dueAt) ? 'Pay ' : 'Pay ') + usd(shown) + (shown < S.cur.owed ? ' now' : '');
+    const b = $('#payBtn'); if (b && ok) b.textContent = shown < S.cur.owed ? 'Pay ' + usd(shown) + ' now' : 'Pay now';
     const h = $('#payHint'); if (h && ok) h.textContent = shown < S.cur.owed ? `${usd(S.cur.owed - shown)} will still be owed. Your pledge stays locked until it is all paid.` : 'This pays everything and frees your whole pledge.';
   }
 });
 document.addEventListener('change', (e) => {
-  if (e.target.id === 'unit') updateHelper();
-  if (e.target.name === 'accept') {
-    S.accept = [...document.querySelectorAll('input[name="accept"]:checked')].map((el) => Number(el.value));
-    const s = e.target.closest('details') && e.target.closest('details').querySelector('summary');
-    if (s) s.textContent = `Savings you accept: ${S.accept.length} of ${VAULTS.filter((v) => v.live).length}`;
-  }
+  if (e.target.id === 'unit' || e.target.id === 'due') updateHelper();
+  if (e.target.id === 'due') S.dueVal = e.target.value;
+  if (e.target.name === 'accept') S.accept = [...document.querySelectorAll('input[name="accept"]:checked')].map((el) => Number(el.value));
 });
-document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.target.id === 'num' || e.target.id === 'numS')) openNumber(e.target.value); });
-$('#sheetBg').addEventListener('click', (e) => { if (e.target.id === 'sheetBg') e.target.hidden = true; });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.id === 'num') openNumber(e.target.value);
+  if (e.key === 'Enter' && e.target.id === 'rwal') lookupRecord();
+});
 
 setInterval(() => {
-  if (S.screen !== 'request' || !S.target) return;
+  if (S.screen !== 'request' || !S.target || !S.cur) return;
   const left = S.target - nowSec(), el = $('#clock');
-  if (left <= 0 && S.cur) { S.target = 0; loadRequest(S.cur.id, true); return; }
+  if (left <= 0) { S.target = 0; if (!DEMO) loadRequest(S.cur.id, true); return; }
   if (el) el.textContent = clockTxt(left);
 }, 1000);
 
-if (window.ethereum && window.ethereum.on) window.ethereum.on('accountsChanged', () => location.reload());
+if (window.ethereum && window.ethereum.on) window.ethereum.on('accountsChanged', () => { if (!DEMO) location.reload(); });
 
 (async () => {
   setup();
-  render();
+  if (DEMO) {
+    if (DEMO_AS === 'seller' || DEMO_AS === 'buyer') { account = DEMO_ME; $('#wallet').textContent = shortAddr(account); }
+    const bar = document.createElement('div'); bar.className = 'demo'; bar.textContent = 'Demo screens with made-up data. Nothing is sent.'; document.body.prepend(bar);
+  }
+  /* old links like ?id=12 open request 12 */
+  const qid = Q.get('id');
+  if (qid && /^[1-9]\d*$/.test(qid)) {
+    Q.delete('id'); const qs = Q.toString();
+    history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + '#/request/' + qid);
+  }
   paintNgnBtn();
   loadRate();
   setInterval(loadRate, 60000);
-  const id = new URLSearchParams(location.search).get('id');
-  if (window.ethereum) { try { const a = await window.ethereum.request({ method: 'eth_accounts' }); if (a.length) await connect(); } catch {} }
-  if (id && /^\d+$/.test(id) && id !== '0') await loadRequest(id);
-  else loadMine();
+  if (!DEMO && window.ethereum) { try { const a = await window.ethereum.request({ method: 'eth_accounts' }); if (a.length) await connect(); } catch {} }
+  route();
 })();
 </script>
 </body>
